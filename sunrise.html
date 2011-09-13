@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>SunRise</title>
+    
+    <script src="jquery-1.6.4.min.js"></script>
+    <script>
+      function calculate_sun()
+      {
+	var convrad = Math.PI / 180;
+	// read GPS position
+	var lw = 11.09845; // longitude west: W is positive, E is negative
+	var Phi = 43.51321; // North latitude: N is positive, S is negative
+
+	// calculate J_date
+	var Jdate = toJulianDate(new Date());
+
+	var n = Math.round (Math.floor(Jdate) - 2451545 - 0.0009 - (lw/360));
+
+	var Jstar = 2451545 + 0.0009 + (lw/360) + n;
+
+	// Solar Mean Anomaly
+	var M = (357.5291 + 0.98560028 * (Jstar - 2451545)) % 360;
+
+	// Equation of Center
+	var C = 1.9148 * Math.sin(M*convrad) + 0.0200 * Math.sin(2*M*convrad) + 0.00300 * Math.sin(3*M*convrad);
+
+	// Ecliptic Longitude
+	var l = (M + 102.9372 + C + 180) % 360;
+
+	// Solar Transit
+	var Jtransit = Jstar + (0.0053 * Math.sin(M*convrad)) - (0.0069 * Math.sin(2*l*convrad));
+	
+	// Declination of the Sun
+	var d = Math.asin(Math.sin(l*convrad) * Math.sin(23.45*convrad)) / convrad;
+	
+	// Hour angle
+	var w0 = Math.acos( (Math.sin(-0.83*convrad) - (Math.sin(Phi*convrad)*Math.sin(d*convrad))) / (Math.cos(Phi*convrad)*Math.cos(d*convrad)) ) / convrad;
+	
+	var Jset = 2451545 + 0.0009 + ((w0+lw)/360) + n + (0.0053*Math.sin(M*convrad)) - 0.0069*Math.sin(2*l*convrad);
+	var Jrise = 2*Jtransit - Jset;
+	
+	$("#jset").text(Jset);
+	$("#jrise").text(Jrise);
+      }
+      
+      function toJulianDate(cd)
+      {
+	var a = Math.floor((14 - (cd.getMonth()+1)) / 12);
+	var y = cd.getFullYear() + 4800 - a;
+	var m = (cd.getMonth()+1) + 12*a - 3;
+	
+	var JDN = cd.getDate() + Math.floor((153*m+2)/5) + (365*y) + Math.floor((97*y/400)) - 32045;
+
+	return (JDN + ((cd.getHours()-12)/24) + (cd.getMinutes()/1440) + (cd.getSeconds()/86400));
+      }
+      
+      function fromJulianDate(jd)
+      {
+      }
+      
+      $(document).ready(function(){
+	$("#jd").text(toJulianDate(new Date()));
+      });
+      
+    </script>
+  <head>
+  
+  <body>
+  
+    JD: <span id="jd"></span> <br /><br />
+    <button onclick="calculate_sun()">Calculate</button> <br /><br />
+    
+    Alba: <span id="jrise"> --- </span> <br />
+    Tramonto: <span id="jset"> --- </span>
+  
+  </body>
+</html>
