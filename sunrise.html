@@ -16,7 +16,7 @@
 	// calculate J_date
 	var Jdate = toJulianDate(new Date());
 
-	var n = Math.round (Math.floor(Jdate) - 2451545 - 0.0009 - (lw/360));
+	var n = Math.round (Jdate - 2451545 - 0.0009 - (lw/360));
 
 	var Jstar = 2451545 + 0.0009 + (lw/360) + n;
 
@@ -41,15 +41,17 @@
 	var Jset = 2451545 + 0.0009 + ((w0+lw)/360) + n + (0.0053*Math.sin(M*convrad)) - 0.0069*Math.sin(2*l*convrad);
 	var Jrise = 2*Jtransit - Jset;
 	
-	$("#jset").text(Jset);
-	$("#jrise").text(Jrise);
+	var dset = fromJulianDate(Jset);
+	var drise = fromJulianDate(Jrise);
+	$("#jset").text(dset.Y + "/" + dset.M + "/" + dset.D + " " + dset.T.h + ":" + dset.T.m + ":" + dset.T.s);
+	$("#jrise").text(drise.Y + "/" + drise.M + "/" + drise.D + " " + drise.T.h + ":" + drise.T.m + ":" + drise.T.s);
       }
       
       function toJulianDate(cd)
       {
-	var a = Math.floor((14 - (cd.getMonth()+1)) / 12);
-	var y = cd.getFullYear() + 4800 - a;
-	var m = (cd.getMonth()+1) + 12*a - 3;
+	var a = Math.floor((14 - (cd.getMonth()+1)) / 12),
+	    y = cd.getFullYear() + 4800 - a,
+	    m = (cd.getMonth()+1) + 12*a - 3;
 	
 	var JDN = cd.getDate() + Math.floor((153*m+2)/5) + (365*y) + Math.floor((97*y/400)) - 32045;
 
@@ -58,6 +60,29 @@
       
       function fromJulianDate(jd)
       {
+	var J = jd + 0.5,
+	    j = J + 32044,
+	    g = Math.floor(j / 146097), dg = j % 146097,
+	    c = Math.floor(3*(Math.floor(dg / 36524) + 1)/4), dc = dg - (c*36524),
+	    b = Math.floor(dc/1461), db = dc % 1461,
+	    a = Math.floor(3*(Math.floor(db / 365) + 1)/4), da = db - 365*a,
+	    y = g*400 + c*100 + b*4 +a,
+	    m = Math.floor((da*5 + 308) / 153) - 2,
+	    d = da - Math.floor(((m+4)*153) / 5) + 122,
+	    Y = y - 4800 + Math.floor((m+2)/12),
+	    M = ((m + 2) % 12) + 1,
+	    D = d + 1;
+
+	var T = (jd + 0.5) - Math.floor(jd + 0.5);
+	console.log(T);
+	T = T * 86400;
+	console.log(T);
+
+	var hour = Math.floor(T / 3600),
+	    min = Math.floor((T-(3600*hour))/60),
+	    sec = Math.floor(T-(3600*hour) - (60*min));
+
+	return {Y: Y, M: M, D: Math.floor(D), T: {h: hour, m: min, s: sec}}
       }
       
       $(document).ready(function(){
