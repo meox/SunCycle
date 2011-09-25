@@ -1,14 +1,9 @@
-@font-face {
-  font-family: StarNext;
-  src: url('StarNext.ttf');
-}
-
 body {
   padding: 5px;
   margin: 0px;
-  min-height: 320px;
-  background-image: url(../img/sunrise.jpg);
-  background-position: right bottom;
+  min-height: 240px;
+  background-image: url(img/sunrise.jpg);
+  background-position: left bottom;
   background-repeat: no-repeat;
   background-size: auto;
   background-color: #000000;
@@ -16,17 +11,10 @@ body {
 }
 
 #header {
-  font-family: 'StarNext';
   text-align: center;
   font-size: 2em;
 }
 
 #content {
   
-}
-
-.stitle {
-  font-family: 'Arial';
-  font-size: 1.0em;
-  font-weight: bold;
 }

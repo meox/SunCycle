@@ -2,9 +2,9 @@
 
 <html>
   <head>
-    <title>SunCycle</title>
+    <title>SunRise</title>
     
-    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
 
     <script src="phonegap-1.0.0.js" charset="utf-8"></script>
     <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
@@ -19,8 +19,8 @@
 	// read GPS position
 
 	// calculate J_date
-	var dd = new Date();
-	//var dd = new Date(2012, 9, 4, 0, 0, 0, 0);
+	//var dd = new Date();
+	var dd = new Date(2012, 9, 4, 0, 0, 0, 0);
 
 	var Jdate = toJulianDate(dd);
 
@@ -95,50 +95,23 @@
 
 	return {Y: Y, M: M, D: Math.floor(D), T: {h: hour, m: min, s: sec}}
       }
-
-      var fixgeometry = function() {
-	/* Some orientation changes leave the scroll position at something
-	  * that isn't 0,0. This is annoying for user experience. */
-	scroll(0, 0);
-
-	/* Calculate the geometry that our content area should take */
-	var content = $("#content");
-	var header = $("#header");
-	//var footer = $("footer:visible");
-	var viewport_height = $(window).height();
-	var content_height = viewport_height - header.outerHeight();// - footer.outerHeight();
-
-	/* Trim margin/border/padding height */
-	content_height -= (content.outerHeight() - content.height()) + 10;
-	content.css("min-height", content_height);
-	$("body").css("background-size", content.outerWidth()+"px " + viewport_height + "px");
-      };
-
+      
       $(document).ready(function(){
-	fixgeometry();
-	$(window).resize(fixgeometry);
-
-	var dd = new Date();
-	var d = dd.getDate(),
-	    m = (dd.getMonth()+1),
-	    y = dd.getFullYear();
-
-	d = (d < 10) ? ('0'+d):(d+'');
-	m = (m < 10) ? ('0'+m):(m+'');
-
-	$("#cd").text(d+"/"+m+"/"+y);
-	calculate_sun();
+	var dd = new Date(2012, 2, 1, 1, 0, 0, 0);
+	$("#jd").text(toJulianDate(dd));
       });
       
     </script>
   <head>
   
   <body>
-    <div id="header">SunCycle <br /><br /></div>
+    <div id="header">SunCycle</div> <br /><br />
     <div id="content">
-      <span class="stitle">Date: </span> <span id="cd"></span> <br /><br />
-      <span class="stitle">SunRise: </span><span id="jrise"> --- </span> <br />
-      <span class="stitle">SunSet: </span> <span id="jset"> --- </span>
+    JD: <span id="jd"></span> <br /><br />
+    <button onclick="calculate_sun()">Calculate</button> <br /><br />
+    
+    Alba: <span id="jrise"> --- </span> <br />
+    Tramonto: <span id="jset"> --- </span>
     </div>
   </body>
 </html>
