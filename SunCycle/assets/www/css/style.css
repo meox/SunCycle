@@ -1,0 +1,20 @@
+body {
+  padding: 5px;
+  margin: 0px;
+  min-height: 240px;
+  background-image: url(img/sunrise.jpg);
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+#header {
+  text-align: center;
+  font-size: 2em;
+}
+
+#content {
+  
+}
