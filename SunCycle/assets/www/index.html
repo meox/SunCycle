@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>SunCycle</title>
+    
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+
+    <script src="phonegap-1.0.0.js" charset="utf-8"></script>
+    <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
+
+    <script>
+      var lw = 11.09845; // longitude west: W is positive, E is negative
+      var Phi = 43.51321; // North latitude: N is positive, S is negative
+
+      function calculate_sun()
+      {
+	var convrad = Math.PI / 180;
+	// read GPS position
+
+	// calculate J_date
+	var dd = new Date();
+	//var dd = new Date(2012, 9, 4, 0, 0, 0, 0);
+
+	var Jdate = toJulianDate(dd);
+
+	var n = Math.round (Jdate - 2451545 - 0.0009 - (lw/360));
+
+	var Jstar = 2451545 + 0.0009 + (lw/360) + n;
+
+	// Solar Mean Anomaly
+	var M = (357.5291 + 0.98560028 * (Jstar - 2451545)) % 360;
+
+	// Equation of Center
+	var C = 1.9148 * Math.sin(M*convrad) + 0.0200 * Math.sin(2*M*convrad) + 0.00300 * Math.sin(3*M*convrad);
+
+	// Ecliptic Longitude
+	var l = (M + 102.9372 + C + 180) % 360;
+
+	// Solar Transit
+	var Jtransit = Jstar + (0.0053 * Math.sin(M*convrad)) - (0.0069 * Math.sin(2*l*convrad));
+	
+	// Declination of the Sun
+	var d = Math.asin(Math.sin(l*convrad) * Math.sin(23.45*convrad)) / convrad;
+	
+	// Hour angle
+	var w0 = Math.acos( (Math.sin(-0.83*convrad) - (Math.sin(Phi*convrad)*Math.sin(d*convrad))) / (Math.cos(Phi*convrad)*Math.cos(d*convrad)) ) / convrad;
+	
+	var Jset = 2451545 + 0.0009 + ((w0+lw)/360) + n + (0.0053*Math.sin(M*convrad)) - 0.0069*Math.sin(2*l*convrad);
+	var Jrise = 2*Jtransit - Jset;
+	
+	var dset = fromJulianDate(Jset);
+	var drise = fromJulianDate(Jrise);
+	$("#jset").text(dset.Y + "/" + dset.M + "/" + dset.D + " " + dset.T.h + ":" + dset.T.m + ":" + dset.T.s);
+	$("#jrise").text(drise.Y + "/" + drise.M + "/" + drise.D + " " + drise.T.h + ":" + drise.T.m + ":" + drise.T.s);
+      }
+
+      function div (a, b) { return Math.floor(a/b); }
+
+      function toJulianDate(cd)
+      {
+	var d = cd.getDate(),
+	    m = (cd.getMonth()+1),
+	    y = cd.getFullYear();
+	var jdn = div(1461 * (y + 4800 + div(m - 14, 12)), 4) +
+          div((367 * (m - 2 - 12 * div(m - 14, 12))), 12) -
+          div((3 * div(y + 4900 + div((m - 14), 12), 100)), 4) + d - 32075;
+
+	return (jdn + ((cd.getHours()-12)/24) + (cd.getMinutes()/1440) + (cd.getSeconds()/86400));
+      }
+      
+      function fromJulianDate(jd)
+      {
+	var hshift = (1 / 48);
+	var ut = (jd + 0.5 + hshift),
+	    J = ut,
+	    j = J + 32044,
+	    g = Math.floor(j / 146097), dg = j % 146097,
+	    c = Math.floor(3*(Math.floor(dg / 36524) + 1)/4), dc = dg - (c*36524),
+	    b = Math.floor(dc/1461), db = dc % 1461,
+	    a = Math.floor(3*(Math.floor(db / 365) + 1)/4), da = (db - 365*a),
+	    y = g*400 + c*100 + b*4 +a,
+	    m = Math.floor((da*5 + 308) / 153) - 2,
+	    d = da - Math.floor(((m+4)*153) / 5) + 122,
+	    Y = y - 4800 + Math.floor((m+2)/12),
+	    M = ((m + 2) % 12) + 1,
+	    D = d + 1;
+
+	var T = ut - Math.floor(ut);
+	T = T * 86400;
+
+	var hour = Math.floor(T / 3600),
+	    min = Math.floor((T-(3600*hour))/60),
+	    sec = Math.floor(T-(3600*hour) - (60*min));
+
+	return {Y: Y, M: M, D: Math.floor(D), T: {h: hour, m: min, s: sec}}
+      }
+
+      var fixgeometry = function() {
+	/* Some orientation changes leave the scroll position at something
+	  * that isn't 0,0. This is annoying for user experience. */
+	scroll(0, 0);
+
+	/* Calculate the geometry that our content area should take */
+	var content = $("#content");
+	var header = $("#header");
+	//var footer = $("footer:visible");
+	var viewport_height = $(window).height();
+	var content_height = viewport_height - header.outerHeight();// - footer.outerHeight();
+
+	/* Trim margin/border/padding height */
+	content_height -= (content.outerHeight() - content.height()) + 10;
+	content.css("min-height", content_height);
+	$("body").css("background-size", content.outerWidth()+"px " + viewport_height + "px");
+      };
+
+      $(document).ready(function(){
+	fixgeometry();
+	$(window).resize(fixgeometry);
+
+	var dd = new Date();
+	var d = dd.getDate(),
+	    m = (dd.getMonth()+1),
+	    y = dd.getFullYear();
+
+	d = (d < 10) ? ('0'+d):(d+'');
+	m = (m < 10) ? ('0'+m):(m+'');
+
+	$("#cd").text(d+"/"+m+"/"+y);
+	calculate_sun();
+      });
+      
+    </script>
+  <head>
+  
+  <body>
+    <div id="header">SunCycle <br /><br /></div>
+    <div id="content">
+      <span class="stitle">Date: </span> <span id="cd"></span> <br /><br />
+      <span class="stitle">SunRise: </span><span id="jrise"> --- </span> <br />
+      <span class="stitle">SunSet: </span> <span id="jset"> --- </span>
+    </div>
+  </body>
+</html>
