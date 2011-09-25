@@ -14,7 +14,10 @@
 	var Phi = 43.51321; // North latitude: N is positive, S is negative
 
 	// calculate J_date
-	var Jdate = toJulianDate(new Date());
+	//var dd = new Date();
+	var dd = new Date(2012, 9, 4, 0, 0, 0, 0);
+
+	var Jdate = toJulianDate(dd);
 
 	var n = Math.round (Jdate - 2451545 - 0.0009 - (lw/360));
 
@@ -46,26 +49,31 @@
 	$("#jset").text(dset.Y + "/" + dset.M + "/" + dset.D + " " + dset.T.h + ":" + dset.T.m + ":" + dset.T.s);
 	$("#jrise").text(drise.Y + "/" + drise.M + "/" + drise.D + " " + drise.T.h + ":" + drise.T.m + ":" + drise.T.s);
       }
-      
+
+      function div (a, b) { return Math.floor(a/b); }
+
       function toJulianDate(cd)
       {
-	var a = Math.floor((14 - (cd.getMonth()+1)) / 12),
-	    y = cd.getFullYear() + 4800 - a,
-	    m = (cd.getMonth()+1) + 12*a - 3;
-	
-	var JDN = cd.getDate() + Math.floor((153*m+2)/5) + (365*y) + Math.floor((97*y/400)) - 32045;
+	var d = cd.getDate(),
+	    m = (cd.getMonth()+1),
+	    y = cd.getFullYear();
+	var jdn = div(1461 * (y + 4800 + div(m - 14, 12)), 4) +
+          div((367 * (m - 2 - 12 * div(m - 14, 12))), 12) -
+          div((3 * div(y + 4900 + div((m - 14), 12), 100)), 4) + d - 32075;
 
-	return (JDN + ((cd.getHours()-12)/24) + (cd.getMinutes()/1440) + (cd.getSeconds()/86400));
+	return (jdn + ((cd.getHours()-12)/24) + (cd.getMinutes()/1440) + (cd.getSeconds()/86400));
       }
       
       function fromJulianDate(jd)
       {
-	var J = jd + 0.5,
+	var hshift = (1 / 48);
+	var ut = (jd + 0.5 + hshift),
+	    J = ut,
 	    j = J + 32044,
 	    g = Math.floor(j / 146097), dg = j % 146097,
 	    c = Math.floor(3*(Math.floor(dg / 36524) + 1)/4), dc = dg - (c*36524),
 	    b = Math.floor(dc/1461), db = dc % 1461,
-	    a = Math.floor(3*(Math.floor(db / 365) + 1)/4), da = db - 365*a,
+	    a = Math.floor(3*(Math.floor(db / 365) + 1)/4), da = (db - 365*a),
 	    y = g*400 + c*100 + b*4 +a,
 	    m = Math.floor((da*5 + 308) / 153) - 2,
 	    d = da - Math.floor(((m+4)*153) / 5) + 122,
@@ -73,10 +81,8 @@
 	    M = ((m + 2) % 12) + 1,
 	    D = d + 1;
 
-	var T = (jd + 0.5) - Math.floor(jd + 0.5);
-	console.log(T);
+	var T = ut - Math.floor(ut);
 	T = T * 86400;
-	console.log(T);
 
 	var hour = Math.floor(T / 3600),
 	    min = Math.floor((T-(3600*hour))/60),
@@ -86,7 +92,8 @@
       }
       
       $(document).ready(function(){
-	$("#jd").text(toJulianDate(new Date()));
+	var dd = new Date(2012, 2, 1, 1, 0, 0, 0);
+	$("#jd").text(toJulianDate(dd));
       });
       
     </script>

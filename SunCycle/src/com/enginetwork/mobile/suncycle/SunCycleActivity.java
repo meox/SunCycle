@@ -1,13 +1,13 @@
 package com.enginetwork.mobile.suncycle;
 
-import com.phonegap.DroidGap;
+import android.app.Activity;
 import android.os.Bundle;
 
-public class SunCycleActivity extends DroidGap {
+public class SunCycleActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.loadUrl("file:///android_asset/www/index.html");
+        setContentView(R.layout.main);
     }
 }
