@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>SunCycle</title>
+    
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/black.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.structure-1.0.min.css" /> 
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+
+    <script src="phonegap-1.3.0.js" charset="utf-8"></script>
+    <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile-1.0.min.js" charset="utf-8"></script>
+    <script src="jquery.fullbg.min.js" charset="utf-8"></script>
+
+    <script>
+      var lw = 11.09845; // longitude west: W is positive, E is negative
+      var Phi = 43.51321; // North latitude: N is positive, S is negative
+      var orig_lw = lw, orig_Phi = Phi;
+
+      document.addEventListener("deviceready", onDeviceReady, false);
+
+      function manageGPS() {
+	navigator.geolocation.getCurrentPosition(function(pos){
+	  // success
+	  lw = pos.coords.longitude;
+	  Phi = pos.coords.latitude;
+	  $("#long").removeClass("dato_error").text(lw);
+	  $("#lat").removeClass("dato_error").text(Phi);
+	  calculate_sun();
+	  setTimeout(manageGPS, 60000);
+	},
+	function() {
+	  // error  
+	  $("#long").addClass("dato_error").removeClass("dato").text(lw);
+	  $("#lat").addClass("dato_error").removeClass("dato").text(Phi);
+	  setTimeout(manageGPS, 60000);
+	});
+      }
+
+      function onDeviceReady() {
+	manageGPS();
+      }
+
+      function rdigit(x) {
+	return (x < 10) ? ('0'+x):(x+'');
+      }
+
+      function calculate_sun()
+      {
+
+	var dd = new Date();
+	var d = dd.getDate(),
+	    m = (dd.getMonth()+1),
+	    y = dd.getFullYear();
+
+	d = rdigit(d);
+	m = rdigit(m);
+
+	$("#cd").text(d+"/"+m+"/"+y);
+
+	var ct_h = rdigit(dd.getHours()), ct_m = rdigit(dd.getMinutes()), ct_s = rdigit(dd.getSeconds());
+	$("#ctime").text(ct_h + ":" + ct_m + ":" + ct_s);
+
+	var convrad = Math.PI / 180;
+
+	// calculate J_date
+	var Jdate = toJulianDate(dd);
+
+	var n = Math.round (Jdate - 2451545 - 0.0009 - (lw/360));
+
+	var Jstar = 2451545 + 0.0009 + (lw/360) + n;
+
+	// Solar Mean Anomaly
+	var M = (357.5291 + 0.98560028 * (Jstar - 2451545)) % 360;
+
+	// Equation of Center
+	var C = 1.9148 * Math.sin(M*convrad) + 0.0200 * Math.sin(2*M*convrad) + 0.00300 * Math.sin(3*M*convrad);
+
+	// Ecliptic Longitude
+	var l = (M + 102.9372 + C + 180) % 360;
+
+	// Solar Transit
+	var Jtransit = Jstar + (0.0053 * Math.sin(M*convrad)) - (0.0069 * Math.sin(2*l*convrad));
+	
+	// Declination of the Sun
+	var d = Math.asin(Math.sin(l*convrad) * Math.sin(23.45*convrad)) / convrad;
+	
+	// Hour angle
+	var w0 = Math.acos( (Math.sin(-0.83*convrad) - (Math.sin(Phi*convrad)*Math.sin(d*convrad))) / (Math.cos(Phi*convrad)*Math.cos(d*convrad)) ) / convrad;
+	
+	var Jset = 2451545 + 0.0009 + ((w0+lw)/360) + n + (0.0053*Math.sin(M*convrad)) - 0.0069*Math.sin(2*l*convrad);
+	var Jrise = 2*Jtransit - Jset;
+	
+	var dset = fromJulianDate(Jset);
+	var drise = fromJulianDate(Jrise);
+
+	dset.T.h = rdigit(dset.T.h);
+	dset.T.m = rdigit(dset.T.m);
+	dset.T.s = rdigit(dset.T.s);
+
+	drise.T.h = rdigit(drise.T.h);
+	drise.T.m = rdigit(drise.T.m);
+	drise.T.s = rdigit(drise.T.s);
+ 
+	$("#jset").text(dset.T.h + ":" + dset.T.m + ":" + dset.T.s /*+ " " + dset.D + "/" + dset.M + "/" + dset.Y*/);
+	$("#jrise").text(drise.T.h + ":" + drise.T.m + ":" + drise.T.s /*+ " " + drise.D + "/" + drise.M + "/" + drise.Y*/);
+      }
+
+      function div (a, b) { return Math.floor(a/b); }
+
+      function toJulianDate(cd)
+      {
+	var d = cd.getDate(),
+	    m = (cd.getMonth()+1),
+	    y = cd.getFullYear();
+
+	var p = (m <= 2 ) ? -1 : 0;
+	var jdn = div(1461 * (y + 4800 + p), 4) +
+          div((367 * (m - 2 - 12 * p)), 12) -
+          div((3 * div(y + 4900 + p, 100)), 4) + d - 32075;
+
+	return (jdn + ((cd.getHours()-12)/24) + (cd.getMinutes()/1440) + (cd.getSeconds()/86400));
+      }
+      
+      function fromJulianDate(jd)
+      {
+	var hshift = (1 / 48);
+	var ut = (jd + 0.5 + hshift),
+	    J = ut,
+	    j = J + 32044,
+	    g = Math.floor(j / 146097), dg = j % 146097,
+	    c = Math.floor(3*(Math.floor(dg / 36524) + 1)/4), dc = dg - (c*36524),
+	    b = Math.floor(dc/1461), db = dc % 1461,
+	    a = Math.floor(3*(Math.floor(db / 365) + 1)/4), da = (db - 365*a),
+	    y = g*400 + c*100 + b*4 +a,
+	    m = Math.floor((da*5 + 308) / 153) - 2,
+	    d = da - Math.floor(((m+4)*153) / 5) + 122,
+	    Y = y - 4800 + Math.floor((m+2)/12),
+	    M = ((m + 2) % 12) + 1,
+	    D = d + 1;
+
+	var T = ut - Math.floor(ut);
+	T = T * 86400;
+
+	var hour = Math.floor(T / 3600),
+	    min = Math.floor((T-(3600*hour))/60),
+	    sec = Math.floor(T-(3600*hour) - (60*min));
+
+	var legal_time = getDST();
+	if(!legal_time) { hour = hour - 1; }
+
+	return {Y: Y, M: M, D: Math.floor(D), T: {h: hour, m: min, s: sec}}
+      }
+
+      function getDST()
+      {
+	var year = new Date().getYear();
+	if (year < 1000)
+	    year += 1900;
+
+	var firstSwitch = 0;
+	var secondSwitch = 0;
+	var lastOffset = 99;
+
+	// Loop through every month of the current year
+	for (i = 0; i < 12; i++)
+	{
+	  // Fetch the timezone value for the month
+	  var newDate = new Date(Date.UTC(year, i, 0, 0, 0, 0, 0));
+	  var tz = -1 * newDate.getTimezoneOffset() / 60;
+
+	  // Capture when a timzezone change occurs
+	  if (tz > lastOffset)
+	      firstSwitch = i-1;
+	  else if (tz < lastOffset)
+	      secondSwitch = i-1;
+
+	  lastOffset = tz;
+	}
+
+	// Go figure out date/time occurences a minute before
+	// a DST adjustment occurs
+	var secondDstDate = FindDstSwitchDate(year, secondSwitch);
+	var firstDstDate = FindDstSwitchDate(year, firstSwitch);
+
+	if (firstDstDate == null && secondDstDate == null)
+	  return false;
+	else
+	{
+	  var cd = new Date(), dst = false;
+	  if(cd > firstDstDate && cd < secondDstDate) { dst = true;}
+	  return dst;
+	}
+      }
+
+      function FindDstSwitchDate(year, month)
+      {
+	// Set the starting date
+	var baseDate = new Date(Date.UTC(year, month, 0, 0, 0, 0, 0));
+	var changeDay = 0;
+	var changeMinute = -1;
+	var baseOffset = -1 * baseDate.getTimezoneOffset() / 60;
+
+	// Loop to find the exact day a timezone adjust occurs
+	for (day = 0; day < 50; day++)
+	{
+	  var tmpDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+	  var tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
+
+	  // Check if the timezone changed from one day to the next
+	  if (tmpOffset != baseOffset)
+	  {
+	    var minutes = 0;
+	    changeDay = day;
+
+	    // Back-up one day and grap the offset
+	    tmpDate = new Date(Date.UTC(year, month, day-1, 0, 0, 0, 0));
+	    tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
+
+	    // Count the minutes until a timezone chnage occurs
+	    while (changeMinute == -1)
+	    {
+	      tmpDate = new Date(Date.UTC(year, month, day-1, 0, minutes, 0, 0));
+	      tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
+
+	      // Determine the exact minute a timezone change
+	      // occurs
+	      if (tmpOffset != baseOffset)
+	      {
+		// Back-up a minute to get the date/time just
+		// before a timezone change occurs
+		tmpOffset = new Date(Date.UTC(year, month, day-1, 0, minutes-1, 0, 0));
+		changeMinute = minutes;
+		break;
+	      }
+	      else
+		minutes++;
+	    }
+
+	    // Capture the time stamp
+	    tmpDate = new Date(Date.UTC(year, month, day-1, 0, minutes-1, 0, 0));
+	    return tmpDate;
+	  }
+	}
+      }
+
+      var fixgeometry = function() {
+	/* Some orientation changes leave the scroll position at something
+	  * that isn't 0,0. This is annoying for user experience. */
+	scroll(0, 0);
+
+	/* Calculate the geometry that our content area should take */
+	var content = $("#content");
+	var header = $("#header");
+	//var footer = $("footer:visible");
+	var viewport_height = $(window).height();
+	var content_height = viewport_height - header.outerHeight();// - footer.outerHeight();
+
+	/* Trim margin/border/padding height */
+	content_height -= (content.outerHeight() - content.height()) + 10;
+	content.css("min-height", content_height);
+	$("body").css("background-size", content.outerWidth()+"px " + viewport_height + "px");
+      };
+
+      $(document).ready(function(){
+	fixgeometry();
+	$(window).resize(fixgeometry);
+
+	calculate_sun();
+      });
+
+      $("#home").live('pageshow', function(){
+	console.log("load home");
+	$("#pbackground").fullBg();
+      });
+      
+    </script>
+  <head>
+  
+  <body>
+    <div id="home" data-role="page" data-theme="a">
+      <img src="img/sunrise.jpg" alt="" id="pbackground" />
+      <div id="header" data-role="header">SunCycle</div>
+      <div data-role="content">
+	<table border="0px" style="width: 100%; border: 0px;">
+	  <tr class="row_active">
+	    <td class="stitle">Date:</td><td><span class="dato" id="cd"></span></td>
+	  </tr>
+	  <tr class="row_active">
+	      <td class="stitle">Time:</td><td><span class="dato" id="ctime"></span></td>
+	  </tr>
+
+	  <tr><td colspan="2">&nbsp;</td></tr>
+
+	  <tr class="row_active">
+	    <td class="stitle">SunRise:</td><td><span class="dato" id="jrise"></span></td>
+	  </tr>
+	  <tr class="row_active">
+	    <td class="stitle">SunSet:</td><td><span class="dato" id="jset"></span></td>
+	  </tr>
+
+	  <tr><td colspan="2">&nbsp;</td></tr>
+
+	  <tr class="row_active">
+	    <td class="stitle">Longitude:</td><td><span class="dato" id="long"></span></td>
+	  </tr>
+	  <tr class="row_active">
+	    <td class="stitle">Latitude:</td><td><span class="dato" id="lat"></span></td>
+	  </tr>
+
+	</table>
+	<br />
+	<a data-role="button" onclick="calculate_sun();">Update</a>
+      </div>
+    </div>
+  </body>
+</html>
