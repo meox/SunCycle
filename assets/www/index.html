@@ -16,6 +16,7 @@
     <script src="jquery.fullbg.min.js" charset="utf-8"></script>
 
     <script>
+      var reload_timer = {};
       var lw = 11.09845; // longitude west: W is positive, E is negative
       var Phi = 43.51321; // North latitude: N is positive, S is negative
       var orig_lw = lw, orig_Phi = Phi;
@@ -100,6 +101,8 @@
 
       function calculate_sun()
       {
+	clearTimeout(reload_timer);
+
 	var dd = new Date();
 	var d = dd.getDate(),
 	    m = (dd.getMonth()+1),
@@ -122,7 +125,7 @@
 	$("#next_jset").text(r_tomorrow.set);
 	$("#next_jrise").text(r_tomorrow.rise);
 
-	setTimeout(calculate_sun, 30000);
+	reload_timer = setTimeout(calculate_sun, 30000);
       }
 
       function div (a, b) { return Math.floor(a/b); }
