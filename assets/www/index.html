@@ -48,22 +48,8 @@
 	return (x < 10) ? ('0'+x):(x+'');
       }
 
-      function calculate_sun()
+      function calculate_bydate(dd)
       {
-
-	var dd = new Date();
-	var d = dd.getDate(),
-	    m = (dd.getMonth()+1),
-	    y = dd.getFullYear();
-
-	d = rdigit(d);
-	m = rdigit(m);
-
-	$("#cd").text(d+"/"+m+"/"+y);
-
-	var ct_h = rdigit(dd.getHours()), ct_m = rdigit(dd.getMinutes()), ct_s = rdigit(dd.getSeconds());
-	$("#ctime").text(ct_h + ":" + ct_m + ":" + ct_s);
-
 	var convrad = Math.PI / 180;
 
 	// calculate J_date
@@ -105,8 +91,38 @@
 	drise.T.m = rdigit(drise.T.m);
 	drise.T.s = rdigit(drise.T.s);
  
-	$("#jset").text(dset.T.h + ":" + dset.T.m + ":" + dset.T.s /*+ " " + dset.D + "/" + dset.M + "/" + dset.Y*/);
-	$("#jrise").text(drise.T.h + ":" + drise.T.m + ":" + drise.T.s /*+ " " + drise.D + "/" + drise.M + "/" + drise.Y*/);
+	//$("#jset").text(dset.T.h + ":" + dset.T.m + ":" + dset.T.s /*+ " " + dset.D + "/" + dset.M + "/" + dset.Y*/);
+	//$("#jrise").text(drise.T.h + ":" + drise.T.m + ":" + drise.T.s /*+ " " + drise.D + "/" + drise.M + "/" + drise.Y*/);
+	var tjset = dset.T.h + ":" + dset.T.m + ":" + dset.T.s;
+	var tjrise = drise.T.h + ":" + drise.T.m + ":" + drise.T.s;
+	return {set: tjset, rise: tjrise};
+      }
+
+      function calculate_sun()
+      {
+	var dd = new Date();
+	var d = dd.getDate(),
+	    m = (dd.getMonth()+1),
+	    y = dd.getFullYear();
+
+	d = rdigit(d);
+	m = rdigit(m);
+
+	$("#cd").text(d+"/"+m+"/"+y);
+
+	var ct_h = rdigit(dd.getHours()), ct_m = rdigit(dd.getMinutes()), ct_s = rdigit(dd.getSeconds());
+	$("#ctime").text(ct_h + ":" + ct_m + ":" + ct_s);
+
+	var r_today = calculate_bydate(dd);
+	var tod = dd.setDate(dd.getDate()+1);
+	var r_tomorrow = calculate_bydate(new Date(tod));
+	$("#jset").text(r_today.set);
+	$("#jrise").text(r_today.rise);
+
+	$("#next_jset").text(r_tomorrow.set);
+	$("#next_jrise").text(r_tomorrow.rise);
+
+	setTimeout(calculate_sun, 30000);
       }
 
       function div (a, b) { return Math.floor(a/b); }
@@ -300,6 +316,15 @@
 	  </tr>
 	  <tr class="row_active">
 	    <td class="stitle">SunSet:</td><td><span class="dato" id="jset"></span></td>
+	  </tr>
+
+	  <tr><td colspan="2">&nbsp;</td></tr>
+
+	  <tr class="row_active">
+	    <td class="stitle">Tomorrow SunRise:</td><td><span class="dato" id="next_jrise"></span></td>
+	  </tr>
+	  <tr class="row_active">
+	    <td class="stitle">Tomorrow SunSet:</td><td><span class="dato" id="next_jset"></span></td>
 	  </tr>
 
 	  <tr><td colspan="2">&nbsp;</td></tr>
