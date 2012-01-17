@@ -13,7 +13,6 @@
     <script src="phonegap-1.3.0.js" charset="utf-8"></script>
     <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
     <script src="jquery.mobile-1.0.min.js" charset="utf-8"></script>
-    <script src="jquery.fullbg.min.js" charset="utf-8"></script>
 
     <script>
       var reload_timer = {};
@@ -91,18 +90,23 @@
 	drise.T.h = rdigit(drise.T.h);
 	drise.T.m = rdigit(drise.T.m);
 	drise.T.s = rdigit(drise.T.s);
- 
-	//$("#jset").text(dset.T.h + ":" + dset.T.m + ":" + dset.T.s /*+ " " + dset.D + "/" + dset.M + "/" + dset.Y*/);
-	//$("#jrise").text(drise.T.h + ":" + drise.T.m + ":" + drise.T.s /*+ " " + drise.D + "/" + drise.M + "/" + drise.Y*/);
+
 	var tjset = dset.T.h + ":" + dset.T.m + ":" + dset.T.s;
 	var tjrise = drise.T.h + ":" + drise.T.m + ":" + drise.T.s;
-	return {set: tjset, rise: tjrise};
+
+	var S_dd = dd.getHours()*3600 + dd.getMinutes()*60 + dd.getSeconds();
+	var S_set = dset.T.h*3600 + dset.T.m*60 + dset.T.s;
+	var S_rise = drise.T.h*3600 + drise.T.m*60 + drise.T.s;
+
+	var to_set = false, to_rise = false;
+	if(S_dd < S_rise && (S_rise - S_dd) < 30*60) { to_rise = "(-" + Math.floor((S_rise - S_dd) / 60) + " min)"; }
+	else if(S_dd > S_rise && S_dd < S_set && (S_set - S_dd) < 30*60) { to_set = "(-" + Math.floor((S_set - S_dd) / 60) + " min)"; }
+
+	return {set: tjset, rise: tjrise, to_set : to_set, to_rise : to_rise};
       }
 
-      function calculate_sun()
+      function updateTime()
       {
-	clearTimeout(reload_timer);
-
 	var dd = new Date();
 	var d = dd.getDate(),
 	    m = (dd.getMonth()+1),
@@ -115,12 +119,25 @@
 
 	var ct_h = rdigit(dd.getHours()), ct_m = rdigit(dd.getMinutes()), ct_s = rdigit(dd.getSeconds());
 	$("#ctime").text(ct_h + ":" + ct_m + ":" + ct_s);
+      }
+
+      function calculate_sun()
+      {
+	clearTimeout(reload_timer);
+
+	var dd = new Date();
+	var d = dd.getDate(),
+	    m = (dd.getMonth()+1),
+	    y = dd.getFullYear();
 
 	var r_today = calculate_bydate(dd);
 	var tod = dd.setDate(dd.getDate()+1);
 	var r_tomorrow = calculate_bydate(new Date(tod));
 	$("#jset").text(r_today.set);
 	$("#jrise").text(r_today.rise);
+
+	if(r_today.to_rise !== false) { $("#to_rise").text(r_today.rise); }
+	if(r_today.to_set !== false) { $("#to_set").text(r_today.set); }
 
 	$("#next_jset").text(r_tomorrow.set);
 	$("#next_jrise").text(r_tomorrow.rise);
@@ -287,38 +304,30 @@
       $(document).ready(function(){
 	fixgeometry();
 	$(window).resize(fixgeometry);
-
+	setInterval (updateTime, 1000);
 	calculate_sun();
       });
-
-      $("#home").live('pageshow', function(){
-	console.log("load home");
-	$("#pbackground").fullBg();
-      });
-      
+    
     </script>
   <head>
   
   <body>
     <div id="home" data-role="page" data-theme="a">
-      <img src="img/sunrise.jpg" alt="" id="pbackground" />
-      <div id="header" data-role="header">SunCycle</div>
+<!--       <img src="img/sunrise.jpg" alt="" id="pbackground" /> -->
+      <div id="header" data-role="header" data-position="fixed">SunCycle</div>
       <div data-role="content">
-	<table border="0px" style="width: 100%; border: 0px;">
+	<table border="0px" style="border: 0px; margin: auto;">
 	  <tr class="row_active">
-	    <td class="stitle">Date:</td><td><span class="dato" id="cd"></span></td>
-	  </tr>
-	  <tr class="row_active">
-	      <td class="stitle">Time:</td><td><span class="dato" id="ctime"></span></td>
+	    <td class="stitle">DateTime:</td><td><span class="dato" id="cd"></span><br /><span class="dato" id="ctime"></span></td>
 	  </tr>
 
 	  <tr><td colspan="2">&nbsp;</td></tr>
 
 	  <tr class="row_active">
-	    <td class="stitle">SunRise:</td><td><span class="dato" id="jrise"></span></td>
+	    <td class="stitle">SunRise:</td><td><span class="dato" id="jrise"></span><span class="dato_yellow" id="to_rise"></span></td>
 	  </tr>
 	  <tr class="row_active">
-	    <td class="stitle">SunSet:</td><td><span class="dato" id="jset"></span></td>
+	    <td class="stitle">SunSet:</td><td><span class="dato" id="jset"></span><span class="dato_yellow" id="to_set"></span></td>
 	  </tr>
 
 	  <tr><td colspan="2">&nbsp;</td></tr>

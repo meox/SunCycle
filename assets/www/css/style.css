@@ -7,12 +7,10 @@ body {
   background-color: #000;
 }
 
-.fullBg {
-  z-index: -1;
-  position: fixed;
-  top: 0;
-  left: 0;
-  overflow: hidden;
+.ui-page {
+  background-image: url(../img/sunrise.jpg);
+  background-size: 100% auto;
+  -webkit-background-size: 100% auto;
 }
 
 #header {
@@ -39,7 +37,6 @@ body {
   text-align: left;
   padding-left: 5px;
   color: #00aa00;
-/*   background-color: rgba(0, 0, 0, 0.7); */
 }
 
 .dato_error {
@@ -49,9 +46,17 @@ body {
   text-align: left;
   padding-left: 5px;
   color: #ffaa00;
-/*   background-color: rgba(0, 0, 0, 0.7); */
 }
 
-.row_active {
+.dato_yellow {
+  font-family: 'Arial';
+  font-size: 1.0em;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 5px;
+  color: #ffff00;
+}
+
+.row_active td {
   background-color: rgba(0, 0, 0, 0.7);
 }
