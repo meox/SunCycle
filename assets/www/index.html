@@ -7,12 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/black.css" />
-    <link rel="stylesheet" href="css/jquery.mobile.structure-1.0.min.css" /> 
+    <link rel="stylesheet" href="css/jquery.mobile.structure-1.0.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.datebox.css" />
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
     <script src="phonegap-1.3.0.js" charset="utf-8"></script>
     <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
     <script src="jquery.mobile-1.0.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
 
     <script>
       var reload_timer = {};
@@ -83,6 +85,10 @@
 	var dset = fromJulianDate(Jset);
 	var drise = fromJulianDate(Jrise);
 
+	var S_dd = dd.getHours()*3600 + dd.getMinutes()*60 + dd.getSeconds();
+	var S_set = dset.T.h*3600 + dset.T.m*60 + dset.T.s;
+	var S_rise = drise.T.h*3600 + drise.T.m*60 + drise.T.s;
+
 	dset.T.h = rdigit(dset.T.h);
 	dset.T.m = rdigit(dset.T.m);
 	dset.T.s = rdigit(dset.T.s);
@@ -93,10 +99,6 @@
 
 	var tjset = dset.T.h + ":" + dset.T.m + ":" + dset.T.s;
 	var tjrise = drise.T.h + ":" + drise.T.m + ":" + drise.T.s;
-
-	var S_dd = dd.getHours()*3600 + dd.getMinutes()*60 + dd.getSeconds();
-	var S_set = dset.T.h*3600 + dset.T.m*60 + dset.T.s;
-	var S_rise = drise.T.h*3600 + drise.T.m*60 + drise.T.s;
 
 	var to_set = false, to_rise = false;
 	if(S_dd < S_rise && (S_rise - S_dd) < 30*60) { to_rise = "(-" + Math.floor((S_rise - S_dd) / 60) + " min)"; }
@@ -119,13 +121,22 @@
 
 	var ct_h = rdigit(dd.getHours()), ct_m = rdigit(dd.getMinutes()), ct_s = rdigit(dd.getSeconds());
 	$("#ctime").text(ct_h + ":" + ct_m + ":" + ct_s);
+	setTimeout(updateTime, 1000);
       }
 
-      function calculate_sun()
+      function calculate_sun(cls, sdate)
       {
 	clearTimeout(reload_timer);
 
 	var dd = new Date();
+	var selector = "#";
+	
+	if(typeof cls !== 'undefined') { selector += cls; }
+	if(typeof sdate !== 'undefined')
+	{
+	  dd = new Date();
+	}
+
 	var d = dd.getDate(),
 	    m = (dd.getMonth()+1),
 	    y = dd.getFullYear();
@@ -136,8 +147,8 @@
 	$("#jset").text(r_today.set);
 	$("#jrise").text(r_today.rise);
 
-	if(r_today.to_rise !== false) { $("#to_rise").text(r_today.rise); }
-	if(r_today.to_set !== false) { $("#to_set").text(r_today.set); }
+	if(r_today.to_rise !== false) { $("#to_rise").text(r_today.to_rise); }
+	if(r_today.to_set !== false) { $("#to_set").text(r_today.to_set); }
 
 	$("#next_jset").text(r_tomorrow.set);
 	$("#next_jrise").text(r_tomorrow.rise);
@@ -304,7 +315,7 @@
       $(document).ready(function(){
 	fixgeometry();
 	$(window).resize(fixgeometry);
-	setInterval (updateTime, 1000);
+	updateTime();
 	calculate_sun();
       });
     
@@ -313,7 +324,6 @@
   
   <body>
     <div id="home" data-role="page" data-theme="a">
-<!--       <img src="img/sunrise.jpg" alt="" id="pbackground" /> -->
       <div id="header" data-role="header" data-position="fixed">SunCycle</div>
       <div data-role="content">
 	<table border="0px" style="border: 0px; margin: auto;">
@@ -350,8 +360,54 @@
 
 	</table>
 	<br />
+	<a href="#choosedate" data-role="button">Change Date</a>
 	<a data-role="button" onclick="calculate_sun();">Update</a>
       </div>
     </div>
+
+
+    <!--<label for="mydate">Some Date</label>
+    <input name="mydate" id="mydate" type="date" data-role="datebox" data-options='{"mode": "flipbox"}'>-->
+
+    <div id="choosedate" data-role="page" data-theme="a">
+      <div id="header" data-role="header" data-position="fixed">SunCycle</div>
+      <div data-role="content">
+	<table border="0px" style="border: 0px; margin: auto; width: 100%;">
+	  <tr class="row_active">
+	    <td colspan="2" style="text-align: center;">
+	      <input name="seldate" id="seldate" type="date" data-role="datebox" data-options='{"mode": "flipbox", "theme" : "a", "pickPageFlipButtonTheme" : "a", "forceInheritTheme" : true}'>
+	    </td>
+	  </tr>
+
+	  <tr><td colspan="2">&nbsp;</td></tr>
+
+	  <tr class="row_active">
+	    <td class="stitle">SunRise:</td><td><span class="dato" id="choosedate_jrise">&nbsp;</span></td>
+	  </tr>
+	  <tr class="row_active">
+	    <td class="stitle">SunSet:</td><td><span class="dato" id="choosedate_jset">&nbsp;</span></td>
+	  </tr>
+
+	  <tr><td colspan="2">&nbsp;</td></tr>
+
+	  <tr class="row_active">
+	    <td class="stitle">Longitude:</td><td><span class="dato" id="choosedate_long">&nbsp;</span></td>
+	  </tr>
+	  <tr class="row_active">
+	    <td class="stitle">Latitude:</td><td><span class="dato" id="choosedate_lat">&nbsp;</span></td>
+	  </tr>
+	</table>
+      </div>
+    </div>
+
+    <script>
+      $('#seldate').live('datebox', function (e, passed) {
+	if(passed.method === 'set')
+	{
+	  console.log($('#seldate').val());
+	  
+	}
+      });
+    </script>
   </body>
 </html>
