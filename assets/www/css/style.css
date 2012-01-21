@@ -13,10 +13,9 @@ body {
   -webkit-background-size: 100% auto;
 }
 
-#header {
-  font-family: 'StarNext';
-  text-align: center;
-  font-size: 2em;
+#headerpage {
+ font-family: 'StarNext';
+ /*font-size: 1.5em;*/
 }
 
 #content {
