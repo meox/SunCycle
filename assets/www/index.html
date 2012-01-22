@@ -13,11 +13,12 @@
 
     <script src="phonegap-1.3.0.js" charset="utf-8"></script>
     <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
-    <script src="jquery.mobile-1.0.min.js" charset="utf-8"></script>
-    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8" src="globalization.js"></script>
+    <script src="multilingua.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
 
     <script>
+      var language = 'en';
       var reload_timer = {};
       var lw = 11.09845; // longitude west: W is positive, E is negative
       var Phi = 43.51321; // North latitude: N is positive, S is negative
@@ -25,26 +26,54 @@
 
       document.addEventListener("deviceready", onDeviceReady, false);
 
-      function manageGPS() {
+      function manageGPS(autocall) {
 	navigator.geolocation.getCurrentPosition(function(pos){
 	  // success
 	  lw = pos.coords.longitude;
 	  Phi = pos.coords.latitude;
-	  $(".long").removeClass("dato_error").text(lw);
-	  $(".lat").removeClass("dato_error").text(Phi);
+	  $("span.long").addClass("dato").removeClass("dato_error").text(lw);
+	  $("span.lat").addClass("dato").removeClass("dato_error").text(Phi);
 	  calculate_sun();
-	  setTimeout(manageGPS, 60000);
+
+	  if(autocall === true) { setTimeout(function(){ manageGPS(true); }, 60000); }
 	},
 	function() {
 	  // error  
-	  $(".long").addClass("dato_error").removeClass("dato").text(lw);
-	  $(".lat").addClass("dato_error").removeClass("dato").text(Phi);
-	  setTimeout(manageGPS, 60000);
+	  $("span.long").addClass("dato_error").removeClass("dato").text(lw);
+	  $("span.lat").addClass("dato_error").removeClass("dato").text(Phi);
+
+	  if(autocall === true) { setTimeout(function(){ manageGPS(true); }, 60000); }
 	});
       }
 
-      function onDeviceReady() {
+      function onDeviceReady()
+      {
 	manageGPS();
+	window.plugins.globalization.getLocaleName(
+	  function (locale) {
+	    language = locale.value.split("_")[0];
+	    console.log("Selection language: " + language);
+	    if(language === 'it')
+	    {
+	      $("#datetime").text(Language[language].datetime);
+	      $("td.title_sunrise").text(Language[language].sunrise);
+	      $("td.title_sunset").text(Language[language].sunset);
+	      $("td.title_solar").text(Language[language].solar_noon);
+	      $("#title_nextsunrise").text(Language[language].tomorrow_sunrise);
+	      $("#title_nextsunset").text(Language[language].tomorrow_sunset);
+	      $("td.title_long").text(Language[language].longitude);
+	      $("td.title_lat").text(Language[language].latitude);
+	      $("#btn_choosedate .ui-btn-text").text(Language[language].select_date);
+	    }
+	  },
+	  function () {}
+	);
+      }
+
+      function updateData()
+      {
+	manageGPS(false);
+	return false;
       }
 
       var fixgeometry = function() {
@@ -54,10 +83,10 @@
 
 	/* Calculate the geometry that our content area should take */
 	var content = $("#content");
-	var header = $("#header");
+	var header = $("[data-role=header]");
 	//var footer = $("footer:visible");
 	var viewport_height = $(window).height();
-	var content_height = viewport_height - header.outerHeight();// - footer.outerHeight();
+	var content_height = viewport_height - header.outerHeight();
 
 	/* Trim margin/border/padding height */
 	content_height -= (content.outerHeight() - content.height()) + 10;
@@ -66,60 +95,62 @@
       };
 
       $(document).ready(function(){
-	fixgeometry();
-	$(window).resize(fixgeometry);
+	//fixgeometry();
+	//$(window).resize(fixgeometry);
 	updateTime();
 	calculate_sun();
       });
-    
+
     </script>
+    <script src="jquery.mobile-1.0.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
   <head>
   
   <body>
     <div id="home" data-role="page" data-theme="a">
       <div data-role="header" data-position="fixed">
 	<h1 id="headerpage">SunCycle</h1>
-	<a href="#" data-icon="refresh" class="ui-btn-right" data-iconpos="notext" onclick="calculate_sun();">Update</a>
+	<a href="#" data-icon="refresh" class="ui-btn-right" data-iconpos="notext" onclick="updateData();">Update</a>
       </div>
       <div data-role="content">
 	<table border="0px" style="border: 0px; margin: auto;">
 	  <tr class="row_active">
-	    <td class="stitle">DateTime:</td><td><span class="dato" id="cd"></span><br /><span class="dato" id="ctime"></span></td>
+	    <td id="datetime" class="stitle">DateTime:</td><td><span class="dato" id="cd"></span><br /><span class="dato" id="ctime"></span></td>
 	  </tr>
 
 	  <tr><td colspan="2">&nbsp;</td></tr>
 
 	  <tr class="row_active">
-	    <td class="stitle">SunRise:</td><td><span class="dato" id="jrise"></span><span class="dato_yellow" id="to_rise"></span></td>
+	    <td class="stitle title_sunrise">SunRise:</td><td><span class="dato" id="jrise"></span><span class="dato_yellow" id="to_rise"></span></td>
 	  </tr>
 	  <tr class="row_active">
-	    <td class="stitle">SunSet:</td><td><span class="dato" id="jset"></span><span class="dato_yellow" id="to_set"></span></td>
+	    <td class="stitle title_sunset">SunSet:</td><td><span class="dato" id="jset"></span><span class="dato_yellow" id="to_set"></span></td>
 	  </tr>
 	  <tr class="row_active">
-	    <td class="stitle">Solar noon:</td><td><span class="dato" id="jtransit"></span></td>
-	  </tr>
-
-	  <tr><td colspan="2">&nbsp;</td></tr>
-
-	  <tr class="row_active">
-	    <td class="stitle">Tomorrow SunRise:</td><td><span class="dato" id="next_jrise"></span></td>
-	  </tr>
-	  <tr class="row_active">
-	    <td class="stitle">Tomorrow SunSet:</td><td><span class="dato" id="next_jset"></span></td>
+	    <td class="stitle title_solar">Solar noon:</td><td><span class="dato" id="jtransit"></span></td>
 	  </tr>
 
 	  <tr><td colspan="2">&nbsp;</td></tr>
 
 	  <tr class="row_active">
-	    <td class="stitle">Longitude:</td><td><span class="dato" class="long"></span></td>
+	    <td id="title_nextsunrise" class="stitle">Tomorrow SunRise:</td><td><span class="dato" id="next_jrise"></span></td>
 	  </tr>
 	  <tr class="row_active">
-	    <td class="stitle">Latitude:</td><td><span class="dato" class="lat"></span></td>
+	    <td id="title_nextsunset" class="stitle">Tomorrow SunSet:</td><td><span class="dato" id="next_jset"></span></td>
+	  </tr>
+
+	  <tr><td colspan="2">&nbsp;</td></tr>
+
+	  <tr class="row_active">
+	    <td class="stitle title_long">Longitude:</td><td><span class="dato long"></span></td>
+	  </tr>
+	  <tr class="row_active">
+	    <td class="stitle title_lat">Latitude:</td><td><span class="dato lat"></span></td>
 	  </tr>
 
 	</table>
 	<br />
-	<a href="#choosedate" data-role="button">Change Date</a>
+	<a id="btn_choosedate" href="#choosedate" data-role="button">Change Date</a>
       </div>
     </div>
 
@@ -139,22 +170,22 @@
 	  <tr><td colspan="2">&nbsp;</td></tr>
 
 	  <tr class="row_active">
-	    <td class="stitle">SunRise:</td><td><span class="dato" id="choosedate_jrise">&nbsp;</span></td>
+	    <td class="stitle title_sunrise">SunRise:</td><td><span class="dato" id="choosedate_jrise">&nbsp;</span></td>
 	  </tr>
 	  <tr class="row_active">
-	    <td class="stitle">SunSet:</td><td><span class="dato" id="choosedate_jset">&nbsp;</span></td>
+	    <td class="stitle title_sunset">SunSet:</td><td><span class="dato" id="choosedate_jset">&nbsp;</span></td>
 	  </tr>
 	  <tr class="row_active">
-	    <td class="stitle">Solar noon:</td><td><span class="dato" id="choosedate_jtransit"></span></td>
+	    <td class="stitle title_solar">Solar noon:</td><td><span class="dato" id="choosedate_jtransit"></span></td>
 	  </tr>
 
 	  <tr><td colspan="2">&nbsp;</td></tr>
 
 	  <tr class="row_active">
-	    <td class="stitle">Longitude:</td><td><span class="dato" class="long">&nbsp;</span></td>
+	    <td class="stitle title_long">Longitude:</td><td><span class="dato long">&nbsp;</span></td>
 	  </tr>
 	  <tr class="row_active">
-	    <td class="stitle">Latitude:</td><td><span class="dato" class="lat">&nbsp;</span></td>
+	    <td class="stitle title_lat">Latitude:</td><td><span class="dato lat">&nbsp;</span></td>
 	  </tr>
 	</table>
       </div>
