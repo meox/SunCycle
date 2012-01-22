@@ -48,7 +48,6 @@
 
       function onDeviceReady()
       {
-	manageGPS();
 	window.plugins.globalization.getLocaleName(
 	  function (locale) {
 	    language = locale.value.split("_")[0];
@@ -68,6 +67,13 @@
 	  },
 	  function () {}
 	);
+
+	manageGPS();
+	/*document.addEventListener("menubutton", function(){
+	  $.mobile.changePage("#menu", {
+	    transition: "pop",
+	  });
+	}, false);*/
       }
 
       function updateData()
@@ -99,6 +105,7 @@
 	//$(window).resize(fixgeometry);
 	updateTime();
 	calculate_sun();
+	setInterval(calculate_sun, 30000);
       });
 
     </script>
@@ -188,6 +195,41 @@
 	    <td class="stitle title_lat">Latitude:</td><td><span class="dato lat">&nbsp;</span></td>
 	  </tr>
 	</table>
+      </div>
+    </div>
+
+    <div id="menu" data-role="dialog" data-theme="a">
+      <div data-role="header" data-position="fixed">
+	<h1 id="headerpage">Men&ugrave;</h1>
+      </div>
+      <div data-role="content">
+	<br /><br />
+	<ul data-role="listview">
+	  <li data-role="fieldcontain">
+	    <label for="slider_alarm">Alarm:</label>
+	    <select name="slider_alarm" id="slider_alarm" data-role="slider">
+	      <option value="off">Off</option>
+	      <option value="on">On</option>
+	    </select> 
+	  </li>
+	  <li data-role="fieldcontain">
+	    <fieldset data-role="controlgroup">
+		<legend>Alert time:</legend>
+		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-1" value="5" checked="checked" />
+		<label for="choice-time-alarm-1">5 min</label>
+		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-2" value="10" />
+		<label for="choice-time-alarm-2">10 min</label>
+		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-3" value="20" />
+		<label for="choice-time-alarm-3">20 min</label>
+	    </fieldset>
+	  </li>
+	  <li class="ui-body">
+	    <fieldset class="ui-grid-a">
+	      <div class="ui-block-a"><button type="submit" onclick="$(this).dialog('close');">Cancel</button></div>
+	      <div class="ui-block-b"><button type="submit">Save</button></div>
+	    </fieldset>
+	  </li>
+	</ul>
       </div>
     </div>
 
