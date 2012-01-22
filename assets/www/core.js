@@ -75,7 +75,7 @@
     d = rdigit(d);
     m = rdigit(m);
 
-    $("#cd").text(d+"/"+m+"/"+y);
+    $("#cd").text(d + "/" + m + "/" + y);
 
     var ct_h = rdigit(dd.getHours()), ct_m = rdigit(dd.getMinutes()), ct_s = rdigit(dd.getSeconds());
     $("#ctime").text(ct_h + ":" + ct_m + ":" + ct_s);
@@ -84,16 +84,13 @@
 
   function calculate_sun(cls, sdate)
   {
-    clearTimeout(reload_timer);
+    console.log(new Date(), "calculate_sun");
 
     var dd = new Date();
     var selector = "#";
     
     if(typeof cls !== 'undefined') { selector += cls + "_"; }
-    if(typeof sdate !== 'undefined')
-    {
-      dd = sdate;
-    }
+    if(typeof sdate !== 'undefined') { dd = sdate; }
 
     var d = dd.getDate(),
 	m = (dd.getMonth()+1),
@@ -107,12 +104,13 @@
     $(selector + "jtransit").text(r_today.transit);
 
     if(r_today.to_rise !== false) { $("#to_rise").text(r_today.to_rise); }
+    else { $("#to_rise").text(""); }
+
     if(r_today.to_set !== false) { $("#to_set").text(r_today.to_set); }
+    else { $("#to_set").text(""); }
 
     $("#next_jset").text(r_tomorrow.set);
     $("#next_jrise").text(r_tomorrow.rise);
-
-    reload_timer = setTimeout(calculate_sun, 30000);
   }
 
   function div (a, b) { return Math.floor(a/b); }
