@@ -1,6 +1,7 @@
 package com.enginetwork.app.suncycle;
 
 import com.phonegap.DroidGap;
+
 import android.os.Bundle;
 
 public class SunCycleActivity extends DroidGap {
@@ -8,6 +9,7 @@ public class SunCycleActivity extends DroidGap {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.loadUrl("file:///android_asset/www/index.html");
+        //super.setIntegerProperty("splashscreen", R.drawable.spalsh);
+        super.loadUrl("file:///android_asset/www/index.html", 1000);
     }
 }
