@@ -21,6 +21,7 @@
 
     // Ecliptic Longitude
     var l = (M + 102.9372 + C + 180) % 360;
+    console.log("Elliptic Longitude: " + l);
 
     // Solar Transit
     var Jtransit = Jstar + (0.0053 * Math.sin(M*convrad)) - (0.0069 * Math.sin(2*l*convrad));
@@ -30,6 +31,12 @@
     
     // Hour angle
     var w0 = Math.acos( (Math.sin(-0.83*convrad) - (Math.sin(Phi*convrad)*Math.sin(d*convrad))) / (Math.cos(Phi*convrad)*Math.cos(d*convrad)) ) / convrad;
+    console.log("W0: " + w0);
+    console.log("Declination: " + d);
+    
+    // sunrise is negative, sunset is positive
+    var ws = Math.acos((-Math.tan(Phi*convrad) * Math.tan(d*convrad))) / convrad;
+    console.log("Sunrise / Sunset W: " + ws);
     
     var Jset = 2451545 + 0.0009 + ((w0+lw)/360) + n + (0.0053*Math.sin(M*convrad)) - 0.0069*Math.sin(2*l*convrad);
     var Jrise = 2*Jtransit - Jset;

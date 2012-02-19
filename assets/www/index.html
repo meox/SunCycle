@@ -6,16 +6,66 @@
     
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/black.css" />
-    <link rel="stylesheet" href="css/jquery.mobile.structure-1.0.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.min.css" />
     <link rel="stylesheet" href="css/jquery.mobile.datebox.css" />
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
-    <script src="phonegap-1.3.0.js" charset="utf-8"></script>
+    <script src="phonegap-1.4.1.js" charset="utf-8"></script>
     <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8" src="globalization.js"></script>
     <script src="multilingua.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
+    <script src="yepnope.1.5.2-min.js" charset="utf-8"></script>
+    <script src="lawnchair-0.6.1.min.js" charset="utf-8"></script>
+
+    <style>
+
+      .nav-glyphish .ui-btn .ui-icon {
+	border-radius: 0 0 0 0 !important;
+	box-shadow: none !important;
+	height: 30px !important;
+	margin-left: -15px !important;
+	width: 30px !important;
+      }
+
+      .nav-glyphish .ui-btn .ui-btn-inner {
+	  padding-top: 40px !important;
+      }
+
+      [name=btn_home] .ui-icon {
+	  background-attachment: scroll;
+	  background-clip: border-box;
+	  background-color: transparent;
+	  background-image: url("img/171-sun.png");
+	  background-origin: padding-box;
+	  background-position: 50% 50%;
+	  background-repeat: no-repeat;
+	  background-size: 22px 24px;
+      }
+
+      [name=btn_choosedate] .ui-icon {
+	  background-attachment: scroll;
+	  background-clip: border-box;
+	  background-color: transparent;
+	  background-image: url("img/83-calendar.png");
+	  background-origin: padding-box;
+	  background-position: 50% 50%;
+	  background-repeat: no-repeat;
+	  background-size: 22px 24px;
+      }
+
+      [name=btn_options] .ui-icon {
+	  background-attachment: scroll;
+	  background-clip: border-box;
+	  background-color: transparent;
+	  background-image: url("img/19-gear.png");
+	  background-origin: padding-box;
+	  background-position: 50% 50%;
+	  background-repeat: no-repeat;
+	  background-size: 22px 24px;
+      }
+
+    </style>
 
     <script>
       var language = 'en';
@@ -25,6 +75,10 @@
       var orig_lw = lw, orig_Phi = Phi;
 
       document.addEventListener("deviceready", onDeviceReady, false);
+
+      $(document).bind("mobileinit", function(){
+	$.mobile.defaultPageTransition = 'none';
+      });
 
       function manageGPS(autocall) {
 	navigator.geolocation.getCurrentPosition(function(pos){
@@ -48,8 +102,7 @@
 
       function onDeviceReady()
       {
-	window.plugins.globalization.getLocaleName(
-	  function (locale) {
+	var load_lang = function(locale) {
 	    language = locale.value.split("_")[0];
 	    console.log("Selection language: " + language);
 	    if(language === 'it')
@@ -62,18 +115,22 @@
 	      $("#title_nextsunset").text(Language[language].tomorrow_sunset);
 	      $("td.title_long").text(Language[language].longitude);
 	      $("td.title_lat").text(Language[language].latitude);
-	      $("#btn_choosedate .ui-btn-text").text(Language[language].select_date);
+	      $('[name="btn_choosedate"]').text(Language[language].select_date);
+	      $('[name="btn_options"]').text(Language[language].options);
 	    }
-	  },
-	  function () {}
-	);
+
+	    yepnope({
+	      load: ["jquery.mobile.min.js", "jquery.mobile.datebox.min.js"]
+	    });
+	};
+
+	window.plugins.globalization = window.plugins.globalization || { getLocaleName: function(){load_lang({value: 'it'});} };
+	window.plugins.globalization.getLocaleName(load_lang, function (){});
 
 	manageGPS();
-	/*document.addEventListener("menubutton", function(){
-	  $.mobile.changePage("#menu", {
-	    transition: "pop",
-	  });
-	}, false);*/
+	document.addEventListener("menubutton", function() {
+	  $.mobile.changePage("#menu");
+	}, false);
       }
 
       function updateData()
@@ -82,35 +139,29 @@
 	return false;
       }
 
-      var fixgeometry = function() {
-	/* Some orientation changes leave the scroll position at something
-	  * that isn't 0,0. This is annoying for user experience. */
-	scroll(0, 0);
-
-	/* Calculate the geometry that our content area should take */
-	var content = $("#content");
-	var header = $("[data-role=header]");
-	//var footer = $("footer:visible");
+      function fixgeometry()
+      {
+	var content = $("div[data-role=page] div[data-role=content]:visible");
+	var header = $("header:visible");
+	var footer = $("footer:visible");
 	var viewport_height = $(window).height();
-	var content_height = viewport_height - header.outerHeight();
+	
+	var content_height = viewport_height - header.outerHeight() - footer.outerHeight() - 25;
 
-	/* Trim margin/border/padding height */
-	content_height -= (content.outerHeight() - content.height()) + 10;
-	content.css("min-height", content_height);
-	$("body").css("background-size", content.outerWidth()+"px " + viewport_height + "px");
-      };
+	content.css("min-height", content_height + "px");
+      }
 
       $(document).ready(function(){
-	//fixgeometry();
-	//$(window).resize(fixgeometry);
+	fixgeometry();
+	$(window).resize(fixgeometry);
 	updateTime();
 	calculate_sun();
 	setInterval(calculate_sun, 30000);
       });
 
     </script>
-    <script src="jquery.mobile-1.0.min.js" charset="utf-8"></script>
-    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
+    <!--<script src="jquery.mobile.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>-->
   <head>
   
   <body>
@@ -157,11 +208,22 @@
 
 	</table>
 	<br />
-	<a id="btn_choosedate" href="#choosedate" data-role="button">Change Date</a>
+
       </div>
+
+      <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+	<div data-role="navbar" data-iconpos="top" class="nav-glyphish">
+	  <ul>
+	    <li><a name="btn_home" class="ui-state-persist ui-btn-active" href="#home" data-icon="sun-home">Home</a></li>
+	    <li><a name="btn_choosedate" href="#choosedate" data-icon="sun-calendar">Change</a></li>
+	    <li><a name="btn_options" href="#menu" data-icon="sun-options">Options</a></li>
+	  </ul>
+	</div>
+      </div>
+
     </div>
 
-    <div id="choosedate" data-role="page" data-theme="a" data-add-back-btn="true">
+    <div id="choosedate" data-role="page" data-theme="a">
       <div data-role="header" data-position="fixed">
 	<h1 id="headerpage">SunCycle</h1>
 	<a href="#" data-icon="refresh" class="ui-btn-right" data-iconpos="notext" onclick="calculate_sun();">Update</a>
@@ -196,11 +258,22 @@
 	  </tr>
 	</table>
       </div>
+
+      <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+	<div data-role="navbar" data-iconpos="top" class="nav-glyphish">
+	  <ul>
+	    <li><a name="btn_home" href="#home" data-icon="sun-home">Home</a></li>
+	    <li><a name="btn_choosedate" class="ui-state-persist ui-btn-active" href="#choosedate" data-icon="sun-calendar">Change</a></li>
+	    <li><a name="btn_options" href="#menu" data-icon="sun-options">Options</a></li>
+	  </ul>
+	</div>
+      </div>
+
     </div>
 
-    <div id="menu" data-role="dialog" data-theme="a">
+    <div id="menu" data-role="page" data-theme="a">
       <div data-role="header" data-position="fixed">
-	<h1 id="headerpage">Men&ugrave;</h1>
+	<h1 id="headerpage">SunCycle</h1>
       </div>
       <div data-role="content">
 	<br /><br />
@@ -223,17 +296,23 @@
 		<label for="choice-time-alarm-3">20 min</label>
 	    </fieldset>
 	  </li>
-	  <li class="ui-body">
-	    <fieldset class="ui-grid-a">
-	      <div class="ui-block-a"><button type="submit" onclick="$(this).dialog('close');">Cancel</button></div>
-	      <div class="ui-block-b"><button type="submit">Save</button></div>
-	    </fieldset>
-	  </li>
 	</ul>
       </div>
+
+      <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+	<div data-role="navbar" data-iconpos="top" class="nav-glyphish">
+	  <ul>
+	    <li><a name="btn_home" href="#home" data-icon="sun-home">Home</a></li>
+	    <li><a name="btn_choosedate" href="#choosedate" data-icon="sun-calendar">Change</a></li>
+	    <li><a name="btn_options" class="ui-state-persist ui-btn-active" href="#menu" data-icon="sun-options">Options</a></li>
+	  </ul>
+	</div>
+      </div>
+
     </div>
 
     <script>
+
       $('#seldate').live('datebox', function (e, passed) {
 	if(passed.method === 'set')
 	{

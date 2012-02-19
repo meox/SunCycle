@@ -9,8 +9,10 @@ body {
 
 .ui-page {
   background-image: url(../img/sunrise.jpg);
+  background-attachment: fixed;
   background-size: 100% auto;
   -webkit-background-size: 100% auto;
+  background-position: 0px 0px;
 }
 
 #headerpage {
