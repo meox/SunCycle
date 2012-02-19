@@ -11,7 +11,7 @@
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
     <script src="phonegap-1.4.1.js" charset="utf-8"></script>
-    <script src="jquery-1.6.4.min.js" charset="utf-8"></script>
+    <script src="jquery-1.7.1.min.js" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8" src="globalization.js"></script>
     <script src="multilingua.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
@@ -160,8 +160,6 @@
       });
 
     </script>
-    <!--<script src="jquery.mobile.min.js" charset="utf-8"></script>
-    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>-->
   <head>
   
   <body>
@@ -288,7 +286,7 @@
 	  <li data-role="fieldcontain">
 	    <fieldset data-role="controlgroup">
 		<legend>Alert time:</legend>
-		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-1" value="5" checked="checked" />
+		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-1" value="5" />
 		<label for="choice-time-alarm-1">5 min</label>
 		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-2" value="10" />
 		<label for="choice-time-alarm-2">10 min</label>
@@ -312,6 +310,43 @@
     </div>
 
     <script>
+
+      $("#menu").on("pageinit", function(){
+	$('#slider_alarm').on("change", function() {
+	    var nt = $(this).val();
+	    console.log(">" + nt);
+	    new Lawnchair(function() {
+	      this.save({key : "alarm_status", val: nt});
+	    });
+	});
+
+	$('input[name="choice-time-alarm"]').on("click", function() {
+	    var nt = $(this).val();
+	    var nid = $(this).attr("id");
+	    console.log(">" + nt, $(this).attr("id"));
+	    new Lawnchair(function() {
+	      this.save({key : "alarm_time", val: nt, rid: nid});
+	    });
+	});
+      });
+
+      $("#menu").on("pageshow", function(){
+
+	Lawnchair(function() {
+	  this.get('alarm_status', function(s){
+	    if(s !== null) {
+		$('#slider_alarm').val(s.val).slider('refresh');
+	    }
+	  });
+
+	  this.get('alarm_time', function(t){
+	    if(t !== null) {
+		$('#'+t.rid).attr("checked", true).checkboxradio("refresh");
+	    }
+	  });
+
+	});
+      });
 
       $('#seldate').live('datebox', function (e, passed) {
 	if(passed.method === 'set')
