@@ -4,10 +4,11 @@ var Language = {
     sunrise: "Alba:",
     sunset: "Tramonto:",
     solar_noon : "Culminazione:",
-    select_date : "Seleziona data",
+    select_date : "Cambia",
     tomorrow_sunrise: "Alba di domani:",
     tomorrow_sunset: "Tramonto di domani:",
     longitude: "Longitudine:",
-    latitude: "Latitudine:"
+    latitude: "Latitudine:",
+    options: "Opzioni"
   }
 };
