@@ -10,12 +10,24 @@
     <link rel="stylesheet" href="css/jquery.mobile.datebox.css" />
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
+    <script type="text/javascript" charset="utf-8">
+      window.JSON = null;
+
+      var myScroll;
+      var language = 'en';
+      var reload_timer = {};
+      var lw = 11.09845; // longitude west: W is positive, E is negative
+      var Phi = 43.51321; // North latitude: N is positive, S is negative
+      var orig_lw = lw, orig_Phi = Phi;
+      var config = { alarm: 0, alarm_time: 0, alarm_disarmed: false };
+    </script>
+
     <script src="phonegap-1.4.1.js" charset="utf-8"></script>
     <script src="jquery-1.7.1.min.js" charset="utf-8"></script>
-    <script type="text/javascript" charset="utf-8" src="globalization.js"></script>
+    <script src="json2.js" charset="utf-8"></script>
+    <script src="globalization.js" charset="utf-8"></script>
     <script src="multilingua.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
-    <script src="yepnope.1.5.2-min.js" charset="utf-8"></script>
     <script src="lawnchair-0.6.1.min.js" charset="utf-8"></script>
 
     <style>
@@ -68,16 +80,12 @@
     </style>
 
     <script>
-      var language = 'en';
-      var reload_timer = {};
-      var lw = 11.09845; // longitude west: W is positive, E is negative
-      var Phi = 43.51321; // North latitude: N is positive, S is negative
-      var orig_lw = lw, orig_Phi = Phi;
-
+      
       document.addEventListener("deviceready", onDeviceReady, false);
 
       $(document).bind("mobileinit", function(){
 	$.mobile.defaultPageTransition = 'none';
+	$.mobile.page.prototype.options.domCache = true;
       });
 
       function manageGPS(autocall) {
@@ -105,7 +113,7 @@
 	var load_lang = function(locale) {
 	    language = locale.value.split("_")[0];
 	    console.log("Selection language: " + language);
-	    if(language === 'it')
+	    if(language !== 'en')
 	    {
 	      $("#datetime").text(Language[language].datetime);
 	      $("td.title_sunrise").text(Language[language].sunrise);
@@ -115,22 +123,36 @@
 	      $("#title_nextsunset").text(Language[language].tomorrow_sunset);
 	      $("td.title_long").text(Language[language].longitude);
 	      $("td.title_lat").text(Language[language].latitude);
-	      $('[name="btn_choosedate"]').text(Language[language].select_date);
-	      $('[name="btn_options"]').text(Language[language].options);
+	      $('[name="btn_choosedate"] .ui-btn-text').text(Language[language].select_date);
+	      $('[name="btn_options"] .ui-btn-text').text(Language[language].options);
 	    }
 
-	    yepnope({
-	      load: ["jquery.mobile.min.js", "jquery.mobile.datebox.min.js"]
-	    });
+	    $("[data-role=page]").on("pageinit", function(){ load_lang(locale); });
 	};
 
-	window.plugins.globalization = window.plugins.globalization || { getLocaleName: function(){load_lang({value: 'it'});} };
+	window.plugins.globalization = window.plugins.globalization || { getLocaleName: function(){load_lang({value: 'en'});} };
 	window.plugins.globalization.getLocaleName(load_lang, function (){});
 
 	manageGPS();
 	document.addEventListener("menubutton", function() {
 	  $.mobile.changePage("#menu");
 	}, false);
+
+	new Lawnchair(function(){
+	  this.get('alarm_status', function(s){
+	    if(s !== null && s.val == 'on') {
+		config.alarm = 1;
+	    }
+	  });
+
+	  this.get('alarm_time', function(t){
+	    if(t !== null) {
+		config.alarm_time = parseInt(t.val);
+	    }
+	  });
+
+	  console.log("Config: alarm = " + config.alarm + ", alarm_time = " + config.alarm_time);
+	});
       }
 
       function updateData()
@@ -139,27 +161,19 @@
 	return false;
       }
 
-      function fixgeometry()
-      {
-	var content = $("div[data-role=page] div[data-role=content]:visible");
-	var header = $("header:visible");
-	var footer = $("footer:visible");
-	var viewport_height = $(window).height();
-	
-	var content_height = viewport_height - header.outerHeight() - footer.outerHeight() - 25;
-
-	content.css("min-height", content_height + "px");
-      }
-
       $(document).ready(function(){
-	fixgeometry();
-	$(window).resize(fixgeometry);
 	updateTime();
 	calculate_sun();
 	setInterval(calculate_sun, 30000);
       });
 
     </script>
+    <script src="jquery.mobile.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile.scrollview.js" charset="utf-8"></script>
+    <script src="jquery.easing.1.3.js" charset="utf-8"></script>
+    <script src="scrollview.js" charset="utf-8"></script>
+
   <head>
   
   <body>
@@ -169,44 +183,43 @@
 	<a href="#" data-icon="refresh" class="ui-btn-right" data-iconpos="notext" onclick="updateData();">Update</a>
       </div>
       <div data-role="content">
-	<table border="0px" style="border: 0px; margin: auto;">
-	  <tr class="row_active">
-	    <td id="datetime" class="stitle">DateTime:</td><td><span class="dato" id="cd"></span><br /><span class="dato" id="ctime"></span></td>
-	  </tr>
+	<div data-scroll="true">
+	  <table border="0px" style="border: 0px; margin: auto;">
+	    <tr class="row_active">
+	      <td id="datetime" class="stitle">DateTime:</td><td><span class="dato" id="cd"></span><br /><span class="dato" id="ctime"></span></td>
+	    </tr>
 
-	  <tr><td colspan="2">&nbsp;</td></tr>
+	    <tr><td colspan="2">&nbsp;</td></tr>
 
-	  <tr class="row_active">
-	    <td class="stitle title_sunrise">SunRise:</td><td><span class="dato" id="jrise"></span><span class="dato_yellow" id="to_rise"></span></td>
-	  </tr>
-	  <tr class="row_active">
-	    <td class="stitle title_sunset">SunSet:</td><td><span class="dato" id="jset"></span><span class="dato_yellow" id="to_set"></span></td>
-	  </tr>
-	  <tr class="row_active">
-	    <td class="stitle title_solar">Solar noon:</td><td><span class="dato" id="jtransit"></span></td>
-	  </tr>
+	    <tr class="row_active">
+	      <td class="stitle title_sunrise">SunRise:</td><td><span class="dato" id="jrise"></span><span class="dato_yellow" id="to_rise"></span></td>
+	    </tr>
+	    <tr class="row_active">
+	      <td class="stitle title_sunset">SunSet:</td><td><span class="dato" id="jset"></span><span class="dato_yellow" id="to_set"></span></td>
+	    </tr>
+	    <tr class="row_active">
+	      <td class="stitle title_solar">Solar noon:</td><td><span class="dato" id="jtransit"></span></td>
+	    </tr>
 
-	  <tr><td colspan="2">&nbsp;</td></tr>
+	    <tr><td colspan="2">&nbsp;</td></tr>
 
-	  <tr class="row_active">
-	    <td id="title_nextsunrise" class="stitle">Tomorrow SunRise:</td><td><span class="dato" id="next_jrise"></span></td>
-	  </tr>
-	  <tr class="row_active">
-	    <td id="title_nextsunset" class="stitle">Tomorrow SunSet:</td><td><span class="dato" id="next_jset"></span></td>
-	  </tr>
+	    <tr class="row_active">
+	      <td id="title_nextsunrise" class="stitle">Tomorrow SunRise:</td><td><span class="dato" id="next_jrise"></span></td>
+	    </tr>
+	    <tr class="row_active">
+	      <td id="title_nextsunset" class="stitle">Tomorrow SunSet:</td><td><span class="dato" id="next_jset"></span></td>
+	    </tr>
 
-	  <tr><td colspan="2">&nbsp;</td></tr>
+	    <tr><td colspan="2">&nbsp;</td></tr>
 
-	  <tr class="row_active">
-	    <td class="stitle title_long">Longitude:</td><td><span class="dato long"></span></td>
-	  </tr>
-	  <tr class="row_active">
-	    <td class="stitle title_lat">Latitude:</td><td><span class="dato lat"></span></td>
-	  </tr>
-
-	</table>
-	<br />
-
+	    <tr class="row_active">
+	      <td class="stitle title_long">Longitude:</td><td><span class="dato long"></span></td>
+	    </tr>
+	    <tr class="row_active">
+	      <td class="stitle title_lat">Latitude:</td><td><span class="dato lat"></span></td>
+	    </tr>
+	  </table>
+	</div>
       </div>
 
       <div data-role="footer" data-position="fixed" data-tap-toggle="false">
@@ -274,27 +287,29 @@
 	<h1 id="headerpage">SunCycle</h1>
       </div>
       <div data-role="content">
-	<br /><br />
-	<ul data-role="listview">
-	  <li data-role="fieldcontain">
-	    <label for="slider_alarm">Alarm:</label>
-	    <select name="slider_alarm" id="slider_alarm" data-role="slider">
-	      <option value="off">Off</option>
-	      <option value="on">On</option>
-	    </select> 
-	  </li>
-	  <li data-role="fieldcontain">
-	    <fieldset data-role="controlgroup">
-		<legend>Alert time:</legend>
-		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-1" value="5" />
-		<label for="choice-time-alarm-1">5 min</label>
-		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-2" value="10" />
-		<label for="choice-time-alarm-2">10 min</label>
-		<input type="radio" name="choice-time-alarm" id="choice-time-alarm-3" value="20" />
-		<label for="choice-time-alarm-3">20 min</label>
-	    </fieldset>
-	  </li>
-	</ul>
+	<div data-scroll="y">
+	  <br /><br />
+	  <ul data-role="listview">
+	    <li data-role="fieldcontain">
+	      <label for="slider_alarm">Alarm:</label>
+	      <select name="slider_alarm" id="slider_alarm" data-role="slider">
+		<option value="off">Off</option>
+		<option value="on">On</option>
+	      </select> 
+	    </li>
+	    <li data-role="fieldcontain">
+	      <fieldset data-role="controlgroup">
+		  <legend>Alert time:</legend>
+		  <input type="radio" name="choice-time-alarm" id="choice-time-alarm-1" value="5" />
+		  <label for="choice-time-alarm-1">5 min</label>
+		  <input type="radio" name="choice-time-alarm" id="choice-time-alarm-2" value="10" />
+		  <label for="choice-time-alarm-2">10 min</label>
+		  <input type="radio" name="choice-time-alarm" id="choice-time-alarm-3" value="20" />
+		  <label for="choice-time-alarm-3">20 min</label>
+	      </fieldset>
+	    </li>
+	  </ul>
+	</div>
       </div>
 
       <div data-role="footer" data-position="fixed" data-tap-toggle="false">
@@ -317,6 +332,8 @@
 	    console.log(">" + nt);
 	    new Lawnchair(function() {
 	      this.save({key : "alarm_status", val: nt});
+	      if(nt === 'on') { config.alarm = 1; }
+	      else { config.alarm = 0; }
 	    });
 	});
 
@@ -326,13 +343,13 @@
 	    console.log(">" + nt, $(this).attr("id"));
 	    new Lawnchair(function() {
 	      this.save({key : "alarm_time", val: nt, rid: nid});
+	      config.alarm_time = parseInt(nt);
 	    });
 	});
       });
 
       $("#menu").on("pageshow", function(){
-
-	Lawnchair(function() {
+	new Lawnchair(function() {
 	  this.get('alarm_status', function(s){
 	    if(s !== null) {
 		$('#slider_alarm').val(s.val).slider('refresh');

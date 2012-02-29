@@ -69,6 +69,21 @@
     if(S_dd < S_rise && (S_rise - S_dd) < 30*60) { to_rise = "(-" + Math.floor((S_rise - S_dd) / 60) + " min)"; }
     else if(S_dd > S_rise && S_dd < S_set && (S_set - S_dd) < 30*60) { to_set = "(-" + Math.floor((S_set - S_dd) / 60) + " min)"; }
 
+    if(
+      config.alarm == 1 &&
+      !config.alarm_disarmed &&
+      (
+	(S_dd < S_rise && (S_rise - S_dd) <= config.alarm_time*60) ||
+	(S_dd > S_rise && S_dd < S_set && (S_set - S_dd) <= config.alarm_time*60)
+      )
+    )
+    {
+      navigator.notification.beep(1);
+      config.alarm_disarmed = true;
+    }
+    
+    if( (S_dd > S_rise && S_dd < S_set) || S_dd > S_set ) { config.alarm_disarmed = false; }
+
     return {set: tjset, rise: tjrise, transit: tjtransit, to_set : to_set, to_rise : to_rise};
   }
 
@@ -110,7 +125,11 @@
     $(selector + "jrise").text(r_today.rise);
     $(selector + "jtransit").text(r_today.transit);
 
-    if(r_today.to_rise !== false) { $("#to_rise").text(r_today.to_rise); }
+    if(r_today.to_rise !== false) {
+      
+     
+      $("#to_rise").text(r_today.to_rise);
+    }
     else { $("#to_rise").text(""); }
 
     if(r_today.to_set !== false) { $("#to_set").text(r_today.to_set); }
@@ -257,4 +276,3 @@
       }
     }
   }
-  
