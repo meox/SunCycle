@@ -9,6 +9,8 @@ var Language = {
     tomorrow_sunset: "Tramonto di domani:",
     longitude: "Longitudine:",
     latitude: "Latitudine:",
-    options: "Opzioni"
+    options: "Opzioni",
+    alarm: "Allarme",
+    alert_time: "Tempo di avviso"
   }
 };

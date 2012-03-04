@@ -69,18 +69,23 @@
     if(S_dd < S_rise && (S_rise - S_dd) < 30*60) { to_rise = "(-" + Math.floor((S_rise - S_dd) / 60) + " min)"; }
     else if(S_dd > S_rise && S_dd < S_set && (S_set - S_dd) < 30*60) { to_set = "(-" + Math.floor((S_set - S_dd) / 60) + " min)"; }
 
-    if(
-      config.alarm == 1 &&
-      !config.alarm_disarmed &&
-      (
-	(S_dd < S_rise && (S_rise - S_dd) <= config.alarm_time*60) ||
-	(S_dd > S_rise && S_dd < S_set && (S_set - S_dd) <= config.alarm_time*60)
-      )
-    )
+    if( config.alarm === 1 && !config.alarm_disarmed && (S_rise > S_dd && (S_rise - S_dd) <= config.alarm_time*60) )
     {
-      navigator.notification.beep(1);
+      var d = Math.floor((S_set - S_dd) / 60);
+      console.log("beep to sunrise: " + d);
       config.alarm_disarmed = true;
+      navigator.notification.beep(1);
+      window.plugins.statusBarNotification.notify("SunCycle", d + " min to sunrise");
     }
+    else if(config.alarm === 1 && !config.alarm_disarmed && (S_dd > S_rise && S_set > S_dd && (S_set - S_dd) <= config.alarm_time*60) )
+    {
+      var d = Math.floor((S_set - S_dd) / 60);
+      console.log("beep to sunset: " + d);
+      config.alarm_disarmed = true;
+      navigator.notification.beep(1);
+      window.plugins.statusBarNotification.notify("SunCycle", d + " min to sunset");
+    }
+    
     
     if( (S_dd > S_rise && S_dd < S_set) || S_dd > S_set ) { config.alarm_disarmed = false; }
 
