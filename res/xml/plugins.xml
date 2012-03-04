@@ -17,4 +17,5 @@
     <plugin name="FileTransfer" value="com.phonegap.FileTransfer"/>
     <plugin name="Capture" value="com.phonegap.Capture"/>
     <plugin name="GlobalizationCommand" value="com.phonegap.plugins.globalization.GlobalizationCommand" />
+    <plugin name="StatusBarNotification" value="com.phonegap.plugins.statusBarNotification.StatusBarNotification"/>
 </plugins>

@@ -26,6 +26,7 @@
     <script src="jquery-1.7.1.min.js" charset="utf-8"></script>
     <script src="json2.js" charset="utf-8"></script>
     <script src="globalization.js" charset="utf-8"></script>
+    <script src="statusbarnotification.js" charset="utf-8"></script>
     <script src="multilingua.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
     <script src="lawnchair-0.6.1.min.js" charset="utf-8"></script>
@@ -125,6 +126,8 @@
 	      $("td.title_lat").text(Language[language].latitude);
 	      $('[name="btn_choosedate"] .ui-btn-text').text(Language[language].select_date);
 	      $('[name="btn_options"] .ui-btn-text').text(Language[language].options);
+	      $("#lang_alarm").text(Language[language].alarm);
+	      $("#lang_alerttime").text(Language[language].alarm_time);
 	    }
 
 	    $("[data-role=page]").on("pageinit", function(){ load_lang(locale); });
@@ -137,6 +140,10 @@
 	document.addEventListener("menubutton", function() {
 	  $.mobile.changePage("#menu");
 	}, false);
+
+// 	document.addEventListener("backbutton", function() {
+// 	  $.mobile.changePage("#home");
+// 	}, false);
 
 	new Lawnchair(function(){
 	  this.get('alarm_status', function(s){
@@ -183,7 +190,7 @@
 	<a href="#" data-icon="refresh" class="ui-btn-right" data-iconpos="notext" onclick="updateData();">Update</a>
       </div>
       <div data-role="content">
-	<div data-scroll="true">
+	<div data-scroll="y">
 	  <table border="0px" style="border: 0px; margin: auto;">
 	    <tr class="row_active">
 	      <td id="datetime" class="stitle">DateTime:</td><td><span class="dato" id="cd"></span><br /><span class="dato" id="ctime"></span></td>
@@ -291,7 +298,7 @@
 	  <br /><br />
 	  <ul data-role="listview">
 	    <li data-role="fieldcontain">
-	      <label for="slider_alarm">Alarm:</label>
+	      <label for="slider_alarm"><span id="lang_alarm">Alarm</span></label>
 	      <select name="slider_alarm" id="slider_alarm" data-role="slider">
 		<option value="off">Off</option>
 		<option value="on">On</option>
@@ -299,7 +306,7 @@
 	    </li>
 	    <li data-role="fieldcontain">
 	      <fieldset data-role="controlgroup">
-		  <legend>Alert time:</legend>
+		  <legend><span id="lang_alerttime">Alert time</span></legend>
 		  <input type="radio" name="choice-time-alarm" id="choice-time-alarm-1" value="5" />
 		  <label for="choice-time-alarm-1">5 min</label>
 		  <input type="radio" name="choice-time-alarm" id="choice-time-alarm-2" value="10" />
