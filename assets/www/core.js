@@ -48,6 +48,10 @@
     var S_dd = dd.getHours()*3600 + dd.getMinutes()*60 + dd.getSeconds();
     var S_set = dset.T.h*3600 + dset.T.m*60 + dset.T.s;
     var S_rise = drise.T.h*3600 + drise.T.m*60 + drise.T.s;
+    
+    // 15° per hour
+    var azimut = -ws + ((S_dd - S_rise)/3600 * 15);
+    console.log("Azimut: " + azimut);
 
     dset.T.h = rdigit(dset.T.h);
     dset.T.m = rdigit(dset.T.m);
@@ -89,7 +93,7 @@
     
     if( (S_dd > S_rise && S_dd < S_set) || S_dd > S_set ) { config.alarm_disarmed = false; }
 
-    return {set: tjset, rise: tjrise, transit: tjtransit, to_set : to_set, to_rise : to_rise};
+    return {set: tjset, rise: tjrise, transit: tjtransit, to_set : to_set, to_rise : to_rise, azimut: azimut.toFixed(3) + " S"};
   }
 
   function updateTime()
@@ -129,6 +133,7 @@
     $(selector + "jset").text(r_today.set);
     $(selector + "jrise").text(r_today.rise);
     $(selector + "jtransit").text(r_today.transit);
+    $(selector + "azimut").text(r_today.azimut);
 
     if(r_today.to_rise !== false) {
       

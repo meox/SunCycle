@@ -158,6 +158,12 @@
 	    }
 	  });
 
+	  this.get('alarm_time', function(v){
+	    if(t !== null) {
+		config.alarm_disarmed = parseInt(v.val);
+	    }
+	  });
+
 	  console.log("Config: alarm = " + config.alarm + ", alarm_time = " + config.alarm_time);
 	});
       }
@@ -206,6 +212,9 @@
 	    </tr>
 	    <tr class="row_active">
 	      <td class="stitle title_solar">Solar noon:</td><td><span class="dato" id="jtransit"></span></td>
+	    </tr>
+	    <tr class="row_active">
+	      <td class="stitle">Azimut:</td><td><span class="dato" id="azimut"></span></td>
 	    </tr>
 
 	    <tr><td colspan="2">&nbsp;</td></tr>
