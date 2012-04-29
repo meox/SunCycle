@@ -1,6 +1,4 @@
-if (!PhoneGap.hasResource("globalization")) {
-	PhoneGap.addResource("globalization");
-	
+
 function Globalization()
 {
 
@@ -522,4 +520,3 @@ GlobalizationError.UNKNOWN_ERROR = 0;
 GlobalizationError.FORMATTING_ERROR = 1;
 GlobalizationError.PARSING_ERROR = 2;
 GlobalizationError.PATTERN_ERROR = 3;
-};

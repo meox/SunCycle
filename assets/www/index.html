@@ -6,7 +6,7 @@
     
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/jquery.mobile.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.1.0.min.css" />
     <link rel="stylesheet" href="css/jquery.mobile.datebox.css" />
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
@@ -22,11 +22,10 @@
       var config = { alarm: 0, alarm_time: 0, alarm_disarmed: false };
     </script>
 
-    <script src="phonegap-1.4.1.js" charset="utf-8"></script>
+    <script src="cordova-1.6.1.js" charset="utf-8"></script>
     <script src="jquery-1.7.1.min.js" charset="utf-8"></script>
     <script src="json2.js" charset="utf-8"></script>
     <script src="globalization.js" charset="utf-8"></script>
-    <script src="statusbarnotification.js" charset="utf-8"></script>
     <script src="multilingua.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
     <script src="lawnchair-0.6.1.min.js" charset="utf-8"></script>
@@ -141,9 +140,10 @@
 	  $.mobile.changePage("#menu");
 	}, false);
 
-// 	document.addEventListener("backbutton", function() {
-// 	  $.mobile.changePage("#home");
-// 	}, false);
+	//document.addEventListener("backbutton", function() {
+	  //$.mobile.changePage("#home");
+	  //navigator.app.exitApp();
+	//}, false);
 
 	new Lawnchair(function(){
 	  this.get('alarm_status', function(s){
@@ -181,7 +181,7 @@
       });
 
     </script>
-    <script src="jquery.mobile.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile-1.1.0.min.js" charset="utf-8"></script>
     <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
     <script src="jquery.mobile.scrollview.js" charset="utf-8"></script>
     <script src="jquery.easing.1.3.js" charset="utf-8"></script>

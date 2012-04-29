@@ -1,8 +1,7 @@
 package com.enginetwork.app.suncycle;
 
-import com.phonegap.DroidGap;
-
 import android.os.Bundle;
+import org.apache.cordova.*;
 
 public class SunCycleActivity extends DroidGap {
     /** Called when the activity is first created. */

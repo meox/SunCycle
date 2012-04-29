@@ -79,7 +79,6 @@
       console.log("beep to sunrise: " + d);
       config.alarm_disarmed = true;
       navigator.notification.beep(1);
-      window.plugins.statusBarNotification.notify("SunCycle", d + " min to sunrise");
     }
     else if(config.alarm === 1 && !config.alarm_disarmed && (S_dd > S_rise && S_set > S_dd && (S_set - S_dd) <= config.alarm_time*60) )
     {
@@ -87,7 +86,6 @@
       console.log("beep to sunset: " + d);
       config.alarm_disarmed = true;
       navigator.notification.beep(1);
-      window.plugins.statusBarNotification.notify("SunCycle", d + " min to sunset");
     }
     
     
