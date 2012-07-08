@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.enginetwork.app.suncycle"
     android:versionCode="12"
-    android:versionName="2.1.0" >
+    android:versionName="2.0.3" >
 
     <uses-sdk android:minSdkVersion="7" />
 	<supports-screens

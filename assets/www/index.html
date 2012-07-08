@@ -22,8 +22,8 @@
       var config = { alarm: 0, alarm_time: 0, alarm_disarmed: false };
     </script>
 
-    <script src="cordova-1.7.0.js" charset="utf-8"></script>
-    <script src="jquery-1.7.1.min.js" charset="utf-8"></script>
+    <script src="cordova-1.9.0.js" charset="utf-8"></script>
+    <script src="jquery-1.7.2.min.js" charset="utf-8"></script>
     <script src="json2.js" charset="utf-8"></script>
     <script src="globalization.js" charset="utf-8"></script>
     <script src="multilingua.js" charset="utf-8"></script>
@@ -140,26 +140,21 @@
 	  $.mobile.changePage("#menu");
 	}, false);
 
-	//document.addEventListener("backbutton", function() {
-	  //$.mobile.changePage("#home");
-	  //navigator.app.exitApp();
-	//}, false);
-
 	new Lawnchair(function(){
 	  this.get('alarm_status', function(s){
-	    if(s !== null && s.val == 'on') {
+	    if(typeof s !== 'undefined' && s !== null && s.val == 'on') {
 		config.alarm = 1;
 	    }
 	  });
 
 	  this.get('alarm_time', function(t){
-	    if(t !== null) {
+	    if(typeof t !== 'undefined' && t !== null) {
 		config.alarm_time = parseInt(t.val);
 	    }
 	  });
 
 	  this.get('alarm_time', function(v){
-	    if(t !== null) {
+	    if(typeof t !== 'undefined' && t !== null) {
 		config.alarm_disarmed = parseInt(v.val);
 	    }
 	  });
