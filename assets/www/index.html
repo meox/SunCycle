@@ -136,9 +136,23 @@
 	window.plugins.globalization.getLocaleName(load_lang, function (){});
 
 	manageGPS();
+
 	document.addEventListener("menubutton", function() {
 	  $.mobile.changePage("#menu");
 	}, false);
+
+	document.addEventListener("backbutton", function() {
+	  if ($.mobile.path.parseUrl(window.location).hash.length === 0)
+	  {
+	    navigator.app.exitApp();
+	  }
+	  else
+	  {
+	    history.back();
+            return false;
+	  }
+	}, false);
+
 
 	new Lawnchair(function(){
 	  this.get('alarm_status', function(s){
