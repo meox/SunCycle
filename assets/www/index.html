@@ -6,7 +6,7 @@
     
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/jquery.mobile-1.1.0.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.1.1.min.css" />
     <link rel="stylesheet" href="css/jquery.mobile.datebox.css" />
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
@@ -16,6 +16,7 @@
       var myScroll;
       var language = 'en';
       var reload_timer = {};
+      var timeruTime = 0;
       var lw = 11.09845; // longitude west: W is positive, E is negative
       var Phi = 43.51321; // North latitude: N is positive, S is negative
       var orig_lw = lw, orig_Phi = Phi;
@@ -27,8 +28,10 @@
     <script src="json2.js" charset="utf-8"></script>
     <script src="globalization.js" charset="utf-8"></script>
     <script src="multilingua.js" charset="utf-8"></script>
+    <script src="utimer.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
     <script src="lawnchair-0.6.1.min.js" charset="utf-8"></script>
+    <script src="raphael-min.js" charset="utf-8"></script>
 
     <style>
 
@@ -66,11 +69,22 @@
 	  background-size: 22px 24px;
       }
 
-      [name=btn_options] .ui-icon {
+      [name=btn_compass] .ui-icon {
 	  background-attachment: scroll;
 	  background-clip: border-box;
 	  background-color: transparent;
 	  background-image: url("img/19-gear.png");
+	  background-origin: padding-box;
+	  background-position: 50% 50%;
+	  background-repeat: no-repeat;
+	  background-size: 22px 24px;
+      }
+
+      [name=btn_compass] .ui-icon {
+	  background-attachment: scroll;
+	  background-clip: border-box;
+	  background-color: transparent;
+	  background-image: url("img/71-compass.png");
 	  background-origin: padding-box;
 	  background-position: 50% 50%;
 	  background-repeat: no-repeat;
@@ -124,7 +138,7 @@
 	      $("td.title_long").text(Language[language].longitude);
 	      $("td.title_lat").text(Language[language].latitude);
 	      $('[name="btn_choosedate"] .ui-btn-text').text(Language[language].select_date);
-	      $('[name="btn_options"] .ui-btn-text').text(Language[language].options);
+	      $('[name="btn_compass"] .ui-btn-text').text(Language[language].compass);
 	      $("#lang_alarm").text(Language[language].alarm);
 	      $("#lang_alerttime").text(Language[language].alert_time);
 	    }
@@ -142,17 +156,16 @@
 	}, false);
 
 	document.addEventListener("backbutton", function() {
-	  if ($.mobile.path.parseUrl(window.location).hash.length === 0)
-	  {
+// 	  if ($.mobile.path.parseUrl(window.location).hash.length === 0)
+// 	  {
 	    navigator.app.exitApp();
-	  }
-	  else
-	  {
-	    history.back();
-            return false;
-	  }
+// 	  }
+// 	  else
+// 	  {
+// 	    history.back();
+//             return false;
+// 	  }
 	}, false);
-
 
 	new Lawnchair(function(){
 	  this.get('alarm_status', function(s){
@@ -177,6 +190,35 @@
 	});
       }
 
+      function draw_map(w)
+      {
+	//console.log("w = " + w);
+	$("#sunmappos").empty();
+
+	var c = 0;
+	navigator.compass.getCurrentHeading(
+		function(h){c = h.magneticHeading; console.log("compass = " + c);},
+		function(h){console.log("Compass error: " + h.code);}
+	);
+
+	var paper = Raphael("sunmappos", 300, 300);
+
+	var r = 15, r_orbit = 75;
+	var d = 90 + w + c;
+	var z_x = 150, z_y = 100;
+	//var start_x = 100+r_orbit, start_y = 100;
+
+	var px = z_x + r_orbit*Math.cos(Math.PI/180*d);
+	var py = z_y - r_orbit*Math.sin(Math.PI/180*d);
+
+	var orbit = paper.circle(z_x, z_y, r_orbit).attr({stroke: "#fff"});
+	var sun = paper.circle(px, py, r);
+	sun.attr({fill: "#ff8a00"});
+
+	paper.text(90, 210, "Compass = " + c.toFixed(3)).attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
+	paper.text(90, 235, "Azimut = " + w.toFixed(3)).attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
+      }
+
       function updateData()
       {
 	manageGPS(false);
@@ -190,12 +232,6 @@
       });
 
     </script>
-    <script src="jquery.mobile-1.1.0.min.js" charset="utf-8"></script>
-    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
-<!--     <script src="jquery.mobile.scrollview.js" charset="utf-8"></script> -->
-<!--     <script src="jquery.easing.1.3.js" charset="utf-8"></script> -->
-<!--     <script src="scrollview.js" charset="utf-8"></script> -->
-
   <head>
   
   <body>
@@ -252,7 +288,7 @@
 	  <ul>
 	    <li><a name="btn_home" class="ui-state-persist ui-btn-active" href="#home" data-icon="sun-home">Home</a></li>
 	    <li><a name="btn_choosedate" href="#choosedate" data-icon="sun-calendar">Change</a></li>
-	    <li><a name="btn_options" href="#menu" data-icon="sun-options">Options</a></li>
+	    <li><a name="btn_compass" href="#sunmap" data-icon="sun-compass">Sun Position</a></li>
 	  </ul>
 	</div>
       </div>
@@ -300,7 +336,7 @@
 	  <ul>
 	    <li><a name="btn_home" href="#home" data-icon="sun-home">Home</a></li>
 	    <li><a name="btn_choosedate" class="ui-state-persist ui-btn-active" href="#choosedate" data-icon="sun-calendar">Change</a></li>
-	    <li><a name="btn_options" href="#menu" data-icon="sun-options">Options</a></li>
+	    <li><a name="btn_compass" href="#sunmap" data-icon="sun-compass">Sun Position</a></li>
 	  </ul>
 	</div>
       </div>
@@ -342,7 +378,27 @@
 	  <ul>
 	    <li><a name="btn_home" href="#home" data-icon="sun-home">Home</a></li>
 	    <li><a name="btn_choosedate" href="#choosedate" data-icon="sun-calendar">Change</a></li>
-	    <li><a name="btn_options" class="ui-state-persist ui-btn-active" href="#menu" data-icon="sun-options">Options</a></li>
+	    <li><a name="btn_compass" class="ui-state-persist ui-btn-active" href="#sunmap" data-icon="sun-compass">Sun Position</a></li>
+	  </ul>
+	</div>
+      </div>
+
+    </div>
+
+    <div id="sunmap" data-role="page" data-theme="a">
+      <div data-role="header" data-position="fixed">
+	<h1 id="headerpage">SunCycle</h1>
+      </div>
+      <div data-role="content">
+	<div id="sunmappos"></div>
+      </div>
+
+      <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+	<div data-role="navbar" data-iconpos="top" class="nav-glyphish">
+	  <ul>
+	    <li><a name="btn_home" href="#home" data-icon="sun-home">Home</a></li>
+	    <li><a name="btn_choosedate" href="#choosedate" data-icon="sun-calendar">Change</a></li>
+	    <li><a name="btn_compass" class="ui-state-persist ui-btn-active" href="#sunmap" data-icon="sun-compass">Sun Position</a></li>
 	  </ul>
 	</div>
       </div>
@@ -371,6 +427,25 @@
 	      config.alarm_time = parseInt(nt);
 	    });
 	});
+      });
+
+      $("#sunmap").on("pageshow", function(){
+	if(typeof this.sunmaptimer === 'undefined')
+	{
+	  this.sunmaptimer = new StackTimeout();
+	}
+	else
+	{
+	  this.sunmaptimer.stopTimeout();
+	}
+
+	var f = function(self){
+	    var r = calculate_bydate(new Date());
+	    draw_map(r.azimut);
+	    self.sunmaptimer.startTimeout(function () {f(self);}, 1000);
+	};
+
+	f(this);
       });
 
       $("#menu").on("pageshow", function(){
@@ -410,5 +485,8 @@
       });
 
     </script>
+    <script src="jquery.mobile-1.1.1.min.js" charset="utf-8"></script>
+    <script src="jquery.mobile.datebox.min.js" charset="utf-8"></script>
+
   </body>
 </html>

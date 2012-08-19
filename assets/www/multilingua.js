@@ -10,6 +10,7 @@ var Language = {
     longitude: "Longitudine:",
     latitude: "Latitudine:",
     options: "Opzioni",
+    compass: "Posizione",
     alarm: "Allarme",
     alert_time: "Tempo di avviso"
   }

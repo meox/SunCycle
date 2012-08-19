@@ -50,7 +50,18 @@
     var S_rise = drise.T.h*3600 + drise.T.m*60 + drise.T.s;
     
     // 15° per hour
-    var azimut = -ws + ((S_dd - S_rise)/3600 * 15);
+    var azimut_0 = -ws + (15*(S_dd - S_rise)/3600);
+    console.log("Azimut0: " + azimut_0);
+    
+    // Solar Elevation
+    var alpha = Math.asin(Math.sin(d*convrad)*Math.sin(Phi*convrad) + Math.cos(d*convrad)*Math.cos(w0*convrad)*Math.cos(Phi*convrad)) / convrad;
+    
+//     console.log("Phi =" + Phi + ";");
+//     console.log("w0 =" + w0 + ";");
+//     console.log("d =" + d + ";");
+//     console.log("alpha =" + alpha + ";");
+    
+    var azimut = Math.acos((Math.sin(d*convrad)-Math.sin(alpha*convrad)*Math.sin(Phi*convrad))/(Math.cos(alpha*convrad)*Math.cos(Phi*convrad))) / convrad;
     console.log("Azimut: " + azimut);
 
     dset.T.h = rdigit(dset.T.h);
@@ -88,14 +99,22 @@
       navigator.notification.beep(1);
     }
     
-    
     if( (S_dd > S_rise && S_dd < S_set) || S_dd > S_set ) { config.alarm_disarmed = false; }
 
-    return {set: tjset, rise: tjrise, transit: tjtransit, to_set : to_set, to_rise : to_rise, azimut: azimut.toFixed(3) + " S"};
+    return {set: tjset, rise: tjrise, transit: tjtransit, to_set : to_set, to_rise : to_rise, azimut: azimut, azimut_str: azimut.toFixed(3) + " S"};
   }
 
   function updateTime()
   {
+    if(timeruTime === 0)
+    {
+      timeruTime = new StackTimeout();
+    }
+    else
+    {
+      timeruTime.stopTimeout();
+    }
+
     var dd = new Date();
     var d = dd.getDate(),
 	m = (dd.getMonth()+1),
@@ -108,7 +127,7 @@
 
     var ct_h = rdigit(dd.getHours()), ct_m = rdigit(dd.getMinutes()), ct_s = rdigit(dd.getSeconds());
     $("#ctime").text(ct_h + ":" + ct_m + ":" + ct_s);
-    setTimeout(updateTime, 5000);
+    timeruTime.startTimeout(updateTime, 5000);
   }
 
   function calculate_sun(cls, sdate)
@@ -131,7 +150,7 @@
     $(selector + "jset").text(r_today.set);
     $(selector + "jrise").text(r_today.rise);
     $(selector + "jtransit").text(r_today.transit);
-    $(selector + "azimut").text(r_today.azimut);
+    $(selector + "azimut").text(r_today.azimut_str);
 
     if(r_today.to_rise !== false) {
       
