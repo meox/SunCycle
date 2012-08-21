@@ -11,6 +11,7 @@ var Language = {
     latitude: "Latitudine:",
     options: "Opzioni",
     compass: "Posizione",
+    elevation: "Elevazione",
     alarm: "Allarme",
     alert_time: "Tempo di avviso"
   }

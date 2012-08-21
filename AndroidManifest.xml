@@ -4,7 +4,7 @@
     android:versionCode="13"
     android:versionName="2.1.0" >
 
-    <uses-sdk android:minSdkVersion="7" />
+    <uses-sdk android:minSdkVersion="8" />
 	<supports-screens
 	android:largeScreens="true"
 	android:normalScreens="true"

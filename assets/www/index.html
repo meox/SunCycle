@@ -11,6 +11,7 @@
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript" charset="utf-8">
+      console = { log: function () {} };
       window.JSON = null;
 
       var myScroll;
@@ -139,6 +140,7 @@
 	      $("td.title_lat").text(Language[language].latitude);
 	      $('[name="btn_choosedate"] .ui-btn-text').text(Language[language].select_date);
 	      $('[name="btn_compass"] .ui-btn-text').text(Language[language].compass);
+	      $("td.title_elevation").text(Language[language].elevation);
 	      $("#lang_alarm").text(Language[language].alarm);
 	      $("#lang_alerttime").text(Language[language].alert_time);
 	    }
@@ -196,10 +198,13 @@
 	$("#sunmappos").empty();
 
 	var c = 0;
-	navigator.compass.getCurrentHeading(
-		function(h){c = h.magneticHeading; console.log("compass = " + c);},
-		function(h){console.log("Compass error: " + h.code);}
-	);
+	if((typeof navigator.compass !== 'undefined') && (typeof navigator.compass.getCurrentHeading !== 'undefined'))
+	{
+	  navigator.compass.getCurrentHeading(
+		  function(h){c = h.magneticHeading; console.log("compass = " + c);},
+		  function(h){console.log("Compass error: " + h.code);}
+	  );
+	}
 
 	var paper = Raphael("sunmappos", 300, 300);
 
@@ -216,7 +221,7 @@
 	sun.attr({fill: "#ff8a00"});
 
 	paper.text(90, 210, "Compass = " + c.toFixed(3)).attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
-	paper.text(90, 235, "Azimut = " + w.toFixed(3)).attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
+	paper.text(90, 235, "Azimut = " + w.toFixed(3) + " S").attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
       }
 
       function updateData()
@@ -261,7 +266,9 @@
 	    <tr class="row_active">
 	      <td class="stitle">Azimut:</td><td><span class="dato" id="azimut"></span></td>
 	    </tr>
-
+	    <tr class="row_active">
+	      <td class="stitle title_elevation">Elevation:</td><td><span class="dato" id="elevation"></span></td>
+	    </tr>
 	    <tr><td colspan="2">&nbsp;</td></tr>
 
 	    <tr class="row_active">
@@ -390,7 +397,7 @@
 	<h1 id="headerpage">SunCycle</h1>
       </div>
       <div data-role="content">
-	<div id="sunmappos"></div>
+	<div id="sunmappos" style="margin: auto; text-align: center;"></div>
       </div>
 
       <div data-role="footer" data-position="fixed" data-tap-toggle="false">

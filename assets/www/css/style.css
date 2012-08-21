@@ -58,6 +58,15 @@ body {
   color: #ffff00;
 }
 
+.dato_orange {
+  font-family: 'Arial';
+  font-size: 1.0em;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 5px;
+  color: #ff5500;
+}
+
 .row_active td {
   background-color: rgba(0, 0, 0, 0.4);
 }

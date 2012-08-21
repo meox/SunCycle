@@ -48,21 +48,13 @@
     var S_dd = dd.getHours()*3600 + dd.getMinutes()*60 + dd.getSeconds();
     var S_set = dset.T.h*3600 + dset.T.m*60 + dset.T.s;
     var S_rise = drise.T.h*3600 + drise.T.m*60 + drise.T.s;
-    
+
     // 15° per hour
-    var azimut_0 = -ws + (15*(S_dd - S_rise)/3600);
-    console.log("Azimut0: " + azimut_0);
-    
-    // Solar Elevation
-    var alpha = Math.asin(Math.sin(d*convrad)*Math.sin(Phi*convrad) + Math.cos(d*convrad)*Math.cos(w0*convrad)*Math.cos(Phi*convrad)) / convrad;
-    
-//     console.log("Phi =" + Phi + ";");
-//     console.log("w0 =" + w0 + ";");
-//     console.log("d =" + d + ";");
-//     console.log("alpha =" + alpha + ";");
-    
-    var azimut = Math.acos((Math.sin(d*convrad)-Math.sin(alpha*convrad)*Math.sin(Phi*convrad))/(Math.cos(alpha*convrad)*Math.cos(Phi*convrad))) / convrad;
+    var azimut = -ws + (15.04108*(S_dd - S_rise)/3600);
     console.log("Azimut: " + azimut);
+
+    var alpha = Math.asin (Math.sin(d*convrad)*Math.sin(Phi*convrad) + Math.cos(d*convrad)*Math.cos(azimut*convrad)*Math.cos(Phi*convrad)) / convrad;
+    console.log("alpha: " + alpha);
 
     dset.T.h = rdigit(dset.T.h);
     dset.T.m = rdigit(dset.T.m);
@@ -101,7 +93,16 @@
     
     if( (S_dd > S_rise && S_dd < S_set) || S_dd > S_set ) { config.alarm_disarmed = false; }
 
-    return {set: tjset, rise: tjrise, transit: tjtransit, to_set : to_set, to_rise : to_rise, azimut: azimut, azimut_str: azimut.toFixed(3) + " S"};
+    return {
+      set: tjset,
+      rise: tjrise,
+      transit: tjtransit,
+      to_set : to_set,
+      to_rise : to_rise,
+      azimut: azimut,
+      azimut_str: azimut.toFixed(3) + " S",
+      elevation: alpha
+    };
   }
 
   function updateTime()
@@ -151,12 +152,21 @@
     $(selector + "jrise").text(r_today.rise);
     $(selector + "jtransit").text(r_today.transit);
     $(selector + "azimut").text(r_today.azimut_str);
-
-    if(r_today.to_rise !== false) {
-      
-     
-      $("#to_rise").text(r_today.to_rise);
+    
+    var alpha = r_today.elevation;
+    if(alpha < 0)
+    {
+      $(selector + "elevation").removeClass("dato_yellow");
+      $(selector + "elevation").addClass("dato_orange");
     }
+    else
+    {
+      $(selector + "elevation").removeClass("dato_orange");
+      $(selector + "elevation").addClass("dato_yellow");
+    }
+    $(selector + "elevation").text(alpha.toFixed(3) + '°');
+
+    if(r_today.to_rise !== false) { $("#to_rise").text(r_today.to_rise); }
     else { $("#to_rise").text(""); }
 
     if(r_today.to_set !== false) { $("#to_set").text(r_today.to_set); }
