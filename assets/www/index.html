@@ -32,6 +32,7 @@
     <script src="utimer.js" charset="utf-8"></script>
     <script src="core.js" charset="utf-8"></script>
     <script src="lawnchair-0.6.1.min.js" charset="utf-8"></script>
+    <script src="jQueryRotateCompressed.2.2.js" charset="utf-8"></script>
     <script src="raphael-min.js" charset="utf-8"></script>
 
     <style>
@@ -206,8 +207,6 @@
 	  );
 	}
 
-	var paper = Raphael("sunmappos", 300, 300);
-
 	var r = 15, r_orbit = 75;
 	var d = 90 + w + c;
 	var z_x = 150, z_y = 100;
@@ -216,12 +215,23 @@
 	var px = z_x + r_orbit*Math.cos(Math.PI/180*d);
 	var py = z_y - r_orbit*Math.sin(Math.PI/180*d);
 
-	var orbit = paper.circle(z_x, z_y, r_orbit).attr({stroke: "#fff"});
-	var sun = paper.circle(px, py, r);
-	sun.attr({fill: "#ff8a00"});
+	if(typeof Raphael !== 'undefined')
+	{
+	  var paper = Raphael("sunmappos", 300, 300);
 
-	paper.text(90, 210, "Compass = " + c.toFixed(3)).attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
-	paper.text(90, 235, "Azimut = " + w.toFixed(3) + " S").attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
+	  var orbit = paper.circle(z_x, z_y, r_orbit).attr({stroke: "#fff"});
+	  var sun = paper.circle(px, py, r);
+	  sun.attr({fill: "#ff8a00"});
+
+	  paper.text(90, 210, "Compass = " + c.toFixed(3)).attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
+	  paper.text(90, 235, "Azimut = " + w.toFixed(3) + " S").attr({font: "12pt Verdana"}).attr({fill: "#0f0"});
+	}
+	else
+	{
+	  //$("#sunmappos").html("Not yet supported for this Android version :(");
+	  $("#sunmappos").html("<img id=\"img_sunpos\" src=\"img/sunpos.png\" /><br /><span class=\"dato\">Compass = "+c.toFixed(3)+"</span><br /><span class=\"dato\">Azimut = "+w.toFixed(3)+"</span>");
+	  $("#img_sunpos").rotate(d);
+	}
       }
 
       function updateData()
