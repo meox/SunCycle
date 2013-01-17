@@ -134,11 +134,26 @@
   function calculate_sun(cls, sdate)
   {
     console.log(new Date(), "calculate_sun");
-
-    var dd = new Date();
     var selector = "#";
-    
     if(typeof cls !== 'undefined') { selector += cls + "_"; }
+    
+    if(!gps_valid)
+    {
+      $(selector + "jset").text("---");
+      $(selector + "jrise").text("---");
+      $(selector + "jtransit").text("---");
+      $(selector + "azimut").text("---");
+      
+      $(selector + "elevation").removeClass("dato_yellow");
+      $(selector + "elevation").addClass("dato_orange");
+      $(selector + "elevation").text("---");
+      
+      $("#next_jset").text("---");
+      $("#next_jrise").text("---");
+      return false;
+    }
+    
+    var dd = new Date();
     if(typeof sdate !== 'undefined') { dd = sdate; }
 
     var d = dd.getDate(),
@@ -225,15 +240,14 @@
   function getDST()
   {
     var year = new Date().getYear();
-    if (year < 1000)
-	year += 1900;
+    if (year < 1000) year += 1900;
 
-    var firstSwitch = 0;
-    var secondSwitch = 0;
-    var lastOffset = 99;
+    var firstSwitch = 0,
+    secondSwitch = 0,
+    lastOffset = 99;
 
     // Loop through every month of the current year
-    for (i = 0; i < 12; i++)
+    for (var i = 0; i < 12; i++)
     {
       // Fetch the timezone value for the month
       var newDate = new Date(Date.UTC(year, i, 0, 0, 0, 0, 0));
@@ -254,7 +268,9 @@
     var firstDstDate = FindDstSwitchDate(year, firstSwitch);
 
     if (firstDstDate == null && secondDstDate == null)
+    {
       return false;
+    }
     else
     {
       var cd = new Date(), dst = false;
@@ -266,13 +282,13 @@
   function FindDstSwitchDate(year, month)
   {
     // Set the starting date
-    var baseDate = new Date(Date.UTC(year, month, 0, 0, 0, 0, 0));
-    var changeDay = 0;
-    var changeMinute = -1;
-    var baseOffset = -1 * baseDate.getTimezoneOffset() / 60;
+    var baseDate = new Date(Date.UTC(year, month, 0, 0, 0, 0, 0)),
+    changeDay = 0,
+    changeMinute = -1,
+    baseOffset = -1 * baseDate.getTimezoneOffset() / 60;
 
     // Loop to find the exact day a timezone adjust occurs
-    for (day = 0; day < 50; day++)
+    for (var day = 0; day < 50; day++)
     {
       var tmpDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
       var tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
@@ -280,36 +296,36 @@
       // Check if the timezone changed from one day to the next
       if (tmpOffset != baseOffset)
       {
-	var minutes = 0;
-	changeDay = day;
+        var minutes = 0;
+        changeDay = day;
 
-	// Back-up one day and grap the offset
-	tmpDate = new Date(Date.UTC(year, month, day-1, 0, 0, 0, 0));
-	tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
+        // Back-up one day and grap the offset
+        tmpDate = new Date(Date.UTC(year, month, day-1, 0, 0, 0, 0));
+        tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
 
-	// Count the minutes until a timezone chnage occurs
-	while (changeMinute == -1)
-	{
-	  tmpDate = new Date(Date.UTC(year, month, day-1, 0, minutes, 0, 0));
-	  tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
+        // Count the minutes until a timezone chnage occurs
+        while (changeMinute == -1)
+        {
+          tmpDate = new Date(Date.UTC(year, month, day-1, 0, minutes, 0, 0));
+          tmpOffset = -1 * tmpDate.getTimezoneOffset() / 60;
 
-	  // Determine the exact minute a timezone change
-	  // occurs
-	  if (tmpOffset != baseOffset)
-	  {
-	    // Back-up a minute to get the date/time just
-	    // before a timezone change occurs
-	    tmpOffset = new Date(Date.UTC(year, month, day-1, 0, minutes-1, 0, 0));
-	    changeMinute = minutes;
-	    break;
-	  }
-	  else
-	    minutes++;
-	}
+          // Determine the exact minute a timezone change
+          // occurs
+          if (tmpOffset != baseOffset)
+          {
+            // Back-up a minute to get the date/time just
+            // before a timezone change occurs
+            tmpOffset = new Date(Date.UTC(year, month, day-1, 0, minutes-1, 0, 0));
+            changeMinute = minutes;
+            break;
+          }
+          else
+            minutes++;
+        }
 
-	// Capture the time stamp
-	tmpDate = new Date(Date.UTC(year, month, day-1, 0, minutes-1, 0, 0));
-	return tmpDate;
+        // Capture the time stamp
+        tmpDate = new Date(Date.UTC(year, month, day-1, 0, minutes-1, 0, 0));
+        return tmpDate;
       }
     }
   }
